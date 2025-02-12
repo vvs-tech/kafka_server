@@ -1,0 +1,25 @@
+-->>> --- Kafka ------ запуск кластера --------------
+
+1. Запустить docker-compose.yaml
+ 1) Зайти в директорию с файлом docker-compose.yaml
+ 2) Выполнить команду docker compose up -d
+ 3) Запустятся все сервисы указанные в doker-compose.yaml
+
+
+2. Установить Kafka локально
+  1) Скаать binary архив c оф. сайта
+  2) Распаковать в дирккторию C:\Kafka
+  3) Добавить в переменную среды PATH путь к директории c:\kafka\bin\windows
+
+3. Открыть командную строку. Для получения информации о kafka кластере используя kafka-metadata-quorum :
+  1) Выполнить kafka-metadata-quorum.bat --bootstrap-server localhost:29092 describe --status
+  2) ClusterId        - Id кластера
+  3) CurrentVoters    - kafka контроллеры
+  4) CurrentObservers - kafka брокеры
+
+
+//Команда для Linux
+kafka-metadata-quorum.sh --bootstrap-server localhost:29092 describe --status
+
+
+--<< --- Kafka --------- запуск кластера -----------
