@@ -15,7 +15,8 @@
   3) Добавить в переменную среды PATH путь к директории c:\kafka\bin\windows
 
 3. Открыть командную строку. Для получения информации о kafka кластере используя kafka-metadata-quorum :
-  1) Выполнить kafka-metadata-quorum.bat --bootstrap-server localhost:29092 describe --status
+  1) Выполнить:
+         kafka-metadata-quorum.bat --bootstrap-server localhost:29092 describe --status
     Где:
          ClusterId        - Id кластера
          CurrentVoters    - kafka контроллеры
@@ -23,7 +24,7 @@
 
 
 //Команда для Linux
-kafka-metadata-quorum.sh --bootstrap-server localhost:29092 describe --status
+kafka-metadata-quorum.bat --bootstrap-server localhost:29092 describe --status
 
 
 --<<< --- Kafka --------- запуск кластера -----------
@@ -35,7 +36,7 @@ kafka-metadata-quorum.sh --bootstrap-server localhost:29092 describe --status
 -->>> --- Kafka --------- Создание топика -----------
 1. Создание топика
     1) Выполнить команду создания топика:
-        kafka-topics.bat --bootstrap-server localhost:29092 --topic sandbox --create --partitions 3 --replication-factor 2
+        kafka-topics.bat --create --bootstrap-server localhost:29092 --topic sandbox --partitions 3 --replication-factor 2
     2) Выполнить команду просмотра информации о топике:
         kafka-topics.bat --bootstrap-server localhost:29092 --topic sandbox --describe
 
@@ -64,7 +65,7 @@ kafka-metadata-quorum.sh --bootstrap-server localhost:29092 describe --status
                     ISR играет ключевую роль в обеспечении надежности и согласованности данных в распределенной системе Kafka, позволяя настраивать баланс между доступностью и гарантиями сохранности данных
 
     3) Чтобы посмотреть список всех топиков в Kafka, можно использовать следующую команду:
-       kafka-topics.sh --list --bootstrap-server localhost:29092
+       kafka-topics.bat --list --bootstrap-server localhost:29092
        Где:
            kafka-topics.sh - скрипт для работы с топиками Kafka
            --list - опция для вывода списка топиков
@@ -72,6 +73,51 @@ kafka-metadata-quorum.sh --bootstrap-server localhost:29092 describe --status
        Эта команда выведет список всех существующих топиков в кластере Kafka
 
 --<<< --- Kafka --------- Создание топика -----------
+
+
+
+
+-->>> --- Kafka --------- Отправка сообщений  -----------
+1. Отправка сообщений:
+    1) Выполнить: kafka-console-producer.bat --bootstrap-server localhost:49092 --topic sandbox
+    2) Отправить несколько сообщений
+
+2. Прием сообщений:
+    1) Выполнить: kafka-console-consumer.bat --bootstrap-server localhost:39092 --topic sandbox
+    2) Отправленные ранее сообщения не отображаются, т.к. consumer создан после того, как сообщения были отправлены и для созданного consumer по умолчанию выставлено смещение offset на конец сегмента топика
+    3) Если отправить новое сообщение, то оно будет получено consumer
+    4) Чтобы consumer увидел все сообщения отправленные до его создания, требуется при создании consumer указать смещение offset и номер партиции:
+        kafka-console-consumer.bat --bootstrap-server localhost:39092 --topic sandbox --partition 1 --offset 1   // тут offset казан 1 , т.е. прочитаны будут сообщения с 1го и далее, а не с 0го и далее
+
+3. Транзакции
+   отправка транзакций. Транзакция несколько сообщений.
+
+4. Уровень изолированности
+   1) Чтобы получатель не получал сообщения транзакций в процессе доставки которых произошла ошибка, или Чтобы такие сообщения не считывались Consumer’ом раньше времени,
+    требуется в получателе указать уровень изолированности --isolation-level read_committed
+    kafka-console-consumer.bat --bootstrap-server localhost:39092 --topic sandbox --partition 1 --offset 1 --isolation-level read_committed
+
+--<<< --- Kafka --------- Отправка сообщений  -----------
+
+
+
+
+-->>>> --- Kafka --------- параметр ACKS  -----------
+
+Теперь разберем сценарий гарантированной доставки сообщения. У Kafka Producer есть параметр acks, который позволяет настраивать, после скольких acknowledge лидеру кластера необходимо считать сообщение успешно записанным.
+Этот параметр может принимать следующие значения:
+
+0 — acknowledge не будут считаться.
+1 — параметр по умолчанию, необходим acknowledge только от 1 реплики.
+−1 — необходимы acknowledge от всех синхронизированных реплик (настройка кластера min.insync.replicas).
+
+Из перечисленных значений видно, что acks равный −1 дает наиболее сильные гарантии, что сообщение не потеряется.
+
+
+Как мы все знаем, распределенные системы ненадежны. Чтобы защититься от временных неисправностей, Kafka Producer предоставляет параметр retries,
+который позволяет задавать количество попыток повторной отправки в течение delivery.timeout.ms. Так как параметр retries имеет значение по умолчанию Integer.MAX_VALUE (2147483647), количество повторных отправок сообщения можно регулировать, меняя только delivery.timeout.ms.
+
+--<<<<< --- Kafka --------- параметр ACKS  -----------
 
 
 
