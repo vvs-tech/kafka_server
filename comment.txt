@@ -67,10 +67,12 @@ kafka-metadata-quorum.bat --bootstrap-server localhost:29092 describe --status
     3) Чтобы посмотреть список всех топиков в Kafka, можно использовать следующую команду:
        kafka-topics.bat --list --bootstrap-server localhost:29092
        Где:
-           kafka-topics.sh - скрипт для работы с топиками Kafka
+           kafka-topics.bat - скрипт для работы с топиками Kafka
            --list - опция для вывода списка топиков
            --bootstrap-server localhost:9092 - адрес и порт Kafka брокера
        Эта команда выведет список всех существующих топиков в кластере Kafka
+
+    4) kafka-topics.bat --bootstrap-server localhost:29092 --describe --topic sandbox
 
 --<<< --- Kafka --------- Создание топика -----------
 
