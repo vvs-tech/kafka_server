@@ -86,6 +86,11 @@ kafka-metadata-quorum.bat --bootstrap-server localhost:29092 describe --status
 
 2. Прием сообщений:
     1) Выполнить: kafka-console-consumer.bat --bootstrap-server localhost:39092 --topic sandbox
+                  kafka-console-consumer.bat --bootstrap-server localhost:39092 --topic sandbox --formatter "kafka.tools.DefaultMessageFormatter" --property print.key=true --property print.partition=true --property print.timestamp=true --from-beginning
+
+                  С фильтрацией по партиции:
+                  kafka-console-consumer.bat --bootstrap-server localhost:39092 --topic sandbox --partition 2 --property print.key=true --property print.partition=true --from-beginning
+
     2) Отправленные ранее сообщения не отображаются, т.к. consumer создан после того, как сообщения были отправлены и для созданного consumer по умолчанию выставлено смещение offset на конец сегмента топика
     3) Если отправить новое сообщение, то оно будет получено consumer
     4) Чтобы consumer увидел все сообщения отправленные до его создания, требуется при создании consumer указать смещение offset и номер партиции:

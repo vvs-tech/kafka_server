@@ -102,31 +102,33 @@ services:
       - broker-1
       - broker-2
       - broker-3
-    command: |
-      bash -c "
-      echo 'Waiting for Kafka brokers...';
-      sleep 5;
-      while ! nc -z broker-1 19092; do sleep 3; done;
-      echo 'Creating topic...';
-      /opt/kafka/bin/kafka-topics.sh --bootstrap-server broker-1:19092 --create --topic sandbox --partitions 3 --replication-factor 2 ;
-      echo 'Topic created successfully!';
-      exit 0;
-      "
+#    command: |
+#      bash -c "
+#      echo 'Waiting for Kafka brokers...';
+#      sleep 5;
+#      while ! nc -z broker-1 19092; do sleep 3; done;
+#      echo 'Creating topic...';
+#      /opt/kafka/bin/kafka-topics.sh --bootstrap-server broker-1:19092 --create --topic sandbox --partitions 3 --replication-factor 2 ;
+#      echo 'Topic created successfully!';
+#      exit 0;
+#      "
     networks:
       - default
 
   kafka-producer:
-    image: kafka-producer  # Имя вашего образа
+    image: kafka-producer
     container_name: kafka-producer-service
+    ports:
+      - "8080:8080"
     environment:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: "broker-1:19092,broker-2:19092,broker-3:19092"
-      APP_TOPIC: "sandbox"     # Топик для отправки сообщений
-      APP_PARTITION: "0"       # Партиция (если нужно)
-      APP_INTERVAL_MS: "5000"  # Интервал отправки (5 сек)
+      APP_TOPIC: "sandbox"
+      APP_PARTITION: "0"
+      APP_INTERVAL_MS: "5000"
     depends_on:
       - kafka-init
       - broker-1
       - broker-2
       - broker-3
     networks:
-      - default  # Подключаем к той же сети, что и Kafka
+      - default
