@@ -116,7 +116,7 @@ services:
       - default
 
   kafka-producer:
-    image: kafka-producer
+    image: st45/kafka-producer
     container_name: kafka-producer-service
     ports:
       - "8080:8080"
@@ -132,3 +132,29 @@ services:
       - broker-3
     networks:
       - default
+
+  clickhouse-server:
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+      - "9009:9009"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - ./clickhouse-config.xml:/etc/clickhouse-server/config.d/kafka.xml:ro
+    environment:
+      - CLICKHOUSE_USER=default
+      - CLICKHOUSE_PASSWORD=default
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8123/ping"]
+      interval: 5s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      - broker-1
+      - broker-2
+      - broker-3
+
+volumes:
+  clickhouse_data:
