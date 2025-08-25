@@ -95,25 +95,98 @@ services:
       - controller-2
       - controller-3
 
-  kafka-init:
-    image: apache/kafka:latest
-    container_name: kafka-init
+#  kafka-init:
+#    image: apache/kafka:latest
+#    container_name: kafka-init
+#    depends_on:
+#      - broker-1
+#      - broker-2
+#      - broker-3
+##    command: |
+##      bash -c "
+##      echo 'Waiting for Kafka brokers...';
+##      sleep 5;
+##      while ! nc -z broker-1 19092; do sleep 3; done;
+##      echo 'Creating topic...';
+##      /opt/kafka/bin/kafka-topics.sh --bootstrap-server broker-1:19092 --create --topic sandbox --partitions 3 --replication-factor 2 ;
+##      echo 'Topic created successfully!';
+##      exit 0;
+##      "
+#    networks:
+#      - default
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - default
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    networks:
+      - default
+
+  redis:
+    image: redis:latest
+    container_name: redis-for-kafka
+    ports:
+      - "6379:6379"
+    environment:
+      - REDIS_TLS=false
     depends_on:
       - broker-1
       - broker-2
       - broker-3
-#    command: |
-#      bash -c "
-#      echo 'Waiting for Kafka brokers...';
-#      sleep 5;
-#      while ! nc -z broker-1 19092; do sleep 3; done;
-#      echo 'Creating topic...';
-#      /opt/kafka/bin/kafka-topics.sh --bootstrap-server broker-1:19092 --create --topic sandbox --partitions 3 --replication-factor 2 ;
-#      echo 'Topic created successfully!';
-#      exit 0;
-#      "
+    volumes:
+      - redis_for_kafka_data:/data
     networks:
       - default
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres-for-kafka
+    environment:
+      POSTGRES_DB: kafka_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - default
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin -d kafka_db" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   kafka-producer:
     image: st45/kafka-producer
@@ -125,8 +198,9 @@ services:
       APP_TOPIC: "sandbox"
       APP_PARTITION: "0"
       APP_INTERVAL_MS: "5000"
+      REDIS_TTL_MSG_SEC: 300
     depends_on:
-      - kafka-init
+#      - kafka-init
       - broker-1
       - broker-2
       - broker-3
@@ -142,19 +216,90 @@ services:
       - "9009:9009"
     volumes:
       - clickhouse_data:/var/lib/clickhouse
-      - ./clickhouse-config.xml:/etc/clickhouse-server/config.d/kafka.xml:ro
+#      - ./clickhouse-config.xml:/etc/clickhouse-server/config.d/kafka.xml:ro
+#      - "C:/Users/vshalaev/Documents/PROJECT/Kafka/Offset_explorer/new_sert/cert_jks/kafka.keystore.jks:/opt/spark/conf/kafka.keystore.jks"
+#      - "C:/Users/vshalaev/Documents/PROJECT/Kafka/Offset_explorer/new_sert/cert_jks/kafka.truststore.jks:/opt/spark/conf/kafka.truststore.jks"
+#      - "C:/Users/vshalaev/Documents/PROJECT/Kafka/Offset_explorer/new_sert/ca.crt:/opt/spark/conf/client.crt"
+#      - "C:/Users/vshalaev/Documents/PROJECT/Kafka/Offset_explorer/new_sert/cert.pem:/opt/spark/conf/ca-cert.pem"
+#      - "C:/Users/vshalaev/Documents/PROJECT/Kafka/Offset_explorer/new_sert/key.pem:/opt/spark/conf/client.key"
     environment:
       - CLICKHOUSE_USER=default
       - CLICKHOUSE_PASSWORD=default
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8123/ping"]
-      interval: 5s
-      timeout: 10s
-      retries: 3
+#      - CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT=1
+#    healthcheck:
+#      test: ["CMD", "curl", "-f", "http://localhost:8123/ping"]
+#      interval: 5s
+#      timeout: 10s
+#      retries: 20
+#    ulimits:
+#      nofile:
+#        soft: 262144
+#        hard: 262144
+    restart: unless-stopped
     depends_on:
       - broker-1
       - broker-2
       - broker-3
 
+#  clickhouse-server:
+#    image: clickhouse/clickhouse-server:latest
+#    container_name: clickhouse
+#    ports:
+#      - "8123:8123"
+#    environment:
+#      CLICKHOUSE_USER: "default"
+#      CLICKHOUSE_PASSWORD: ""
+#      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1"
+##    healthcheck:
+##      test: ["CMD", "curl", "-f", "http://localhost:8123/ping"]
+##      interval: 5s
+##      timeout: 10s
+##      retries: 30
+#    restart: on-failure
+
+  kafka-consumer:
+    image: st45/kafka-consumer
+    container_name: kafka-consumer-service
+    ports:
+      - "8081:8080"
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: "broker-1:19092,broker-2:19092,broker-3:19092"
+      SPRING_KAFKA_CONSUMER_GROUP_ID: "clickhouse-group"
+      KAFKA_TOPIC: "sandbox"
+      CLICKHOUSE_URL: "jdbc:clickhouse://clickhouse-server:8123/default"
+      CLICKHOUSE_USER: "default"
+      CLICKHOUSE_PASSWORD: "default"
+      CLICKHOUSE_BATCH_SIZE: "1000"
+      CLICKHOUSE_BATCH_TIMEOUT_MS: "5000"
+      SPRING_DATASOURCE_CLICKHOUSE_URL: "jdbc:clickhouse://clickhouse-server:8123/default"
+      SPRING_DATASOURCE_CLICKHOUSE_USERNAME: "default"
+      SPRING_DATASOURCE_CLICKHOUSE_PASSWORD: "default"
+      SPRING_DATA_REDIS_HOST: redis-for-kafka
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_TIMEOUT: 5000
+      SPRING_DATA_REDIS_DATABASE: 0
+      KAFKA_DLQ_TOPIC_NAME: "dlq_messages"
+      KAFKA_USQ_TOPIC_NAME: "usq_messages"
+    depends_on:
+      broker-1:
+        condition: service_started
+      broker-2:
+        condition: service_started
+      broker-3:
+        condition: service_started
+#      clickhouse-server:
+#        condition: service_healthy
+    networks:
+      - default
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
 volumes:
   clickhouse_data:
+  redis_for_kafka_data:
+  postgres_data:
+  prometheus_data:
+  grafana_data:

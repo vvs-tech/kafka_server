@@ -1,5 +1,23 @@
 <yandex>
     <kafka>
         <auto_offset_reset>earliest</auto_offset_reset>
+<!--        <ssl_ca_location>/opt/spark/conf/kafka.truststore.jks</ssl_ca_location>-->
+<!--        <ssl_certificate_location>/opt/spark/conf/kafka.keystore.jks</ssl_certificate_location>-->
+<!--        <ssl_key_location>/opt/spark/conf/kafka.keystore.jks</ssl_key_location>-->
+<!--        <ssl_key_password>your_password</ssl_key_password>-->
+<!--        <ssl_keystore_password><![CDATA[wAUyWEpL<>tWU9VxcAipcZP]]></ssl_keystore_password>-->
+<!--        <ssl_truststore_password><![CDATA[wAUyWEpL<>tWU9VxcAipcZP]]></ssl_truststore_password>-->
+<!--        <security_protocol>ssl</security_protocol>-->
+<!--        <ssl_truststore_location>/opt/spark/conf/kafka.truststore.jks</ssl_truststore_location>-->
+<!--        <ssl_truststore_password><![CDATA[wAUyWEpL<>tWU9VxcAipcZP]]></ssl_truststore_password>-->
+<!--        <ssl_keystore_location>/opt/spark/conf/kafka.keystore.jks</ssl_keystore_location>-->
+<!--        <ssl_keystore_password><![CDATA[wAUyWEpL<>tWU9VxcAipcZP]]></ssl_keystore_password>-->
+<!--        <ssl_key_password><![CDATA[wAUyWEpL<>tWU9VxcAipcZP]]></ssl_key_password>-->
+<!--        <ssl_endpoint_identification_algorithm></ssl_endpoint_identification_algorithm>-->
+        <ssl>
+            <ca_cert>/opt/spark/conf/client.crt</ca_cert> <!-- Дайте путь к вашему CA сертификату -->
+            <client_cert>/opt/spark/conf/ca-cert.pem</client_cert> <!-- Дайте путь к клиентскому сертификату -->
+            <client_key>/opt/spark/conf/client.key</client_key> <!-- Дайте путь к клиентскому ключу -->
+        </ssl>
     </kafka>
 </yandex>
