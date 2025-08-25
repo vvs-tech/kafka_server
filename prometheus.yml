@@ -11,6 +11,14 @@ scrape_configs:
           application: 'kafka-producer-service'
           group: 'kafka-services'
 
+  - job_name: 'kafka-consumer'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['kafka-consumer-service:8080']
+        labels:
+          application: 'kafka-consumer-service'
+          group: 'kafka-services'
+
   - job_name: 'kafka-brokers'
     static_configs:
       - targets: ['broker-1:19092', 'broker-2:19092', 'broker-3:19092']
