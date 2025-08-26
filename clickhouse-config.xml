@@ -1,4 +1,21 @@
 <yandex>
+    <http_server_default_response>
+        <access_control_allow_origin>*</access_control_allow_origin>
+        <access_control_allow_headers>authorization,content-type</access_control_allow_headers>
+        <access_control_allow_methods>GET,POST,OPTIONS</access_control_allow_methods>
+        <access_control_allow_credentials>true</access_control_allow_credentials>
+    </http_server_default_response>
+
+    <http_handlers>
+        <rule>
+            <url>/</url>
+            <methods>POST,GET,OPTIONS</methods>
+            <handler>
+                <type>dynamic_query_handler</type>
+                <query_param_name>query</query_param_name>
+            </handler>
+        </rule>
+    </http_handlers>
     <kafka>
         <auto_offset_reset>earliest</auto_offset_reset>
 <!--        <ssl_ca_location>/opt/spark/conf/kafka.truststore.jks</ssl_ca_location>-->
@@ -15,9 +32,10 @@
 <!--        <ssl_key_password><![CDATA[wAUyWEpL<>tWU9VxcAipcZP]]></ssl_key_password>-->
 <!--        <ssl_endpoint_identification_algorithm></ssl_endpoint_identification_algorithm>-->
         <ssl>
-            <ca_cert>/opt/spark/conf/client.crt</ca_cert> <!-- Дайте путь к вашему CA сертификату -->
-            <client_cert>/opt/spark/conf/ca-cert.pem</client_cert> <!-- Дайте путь к клиентскому сертификату -->
-            <client_key>/opt/spark/conf/client.key</client_key> <!-- Дайте путь к клиентскому ключу -->
+            <ca_cert>/opt/spark/conf/client.crt</ca_cert> <!-- путь к CA сертификату -->
+            <client_cert>/opt/spark/conf/ca-cert.pem</client_cert> <!--  путь к клиентскому сертификату -->
+            <client_key>/opt/spark/conf/client.key</client_key> <!--  путь к клиентскому ключу -->
         </ssl>
     </kafka>
 </yandex>
+

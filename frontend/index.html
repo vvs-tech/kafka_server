@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClickHouse Feature Store Manager</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>ClickHouse Feature Store Manager</h1>
+        <nav>
+            <button class="tab-btn active" data-tab="add-field">Добавить поле</button>
+            <button class="tab-btn" data-tab="remove-field">Удалить поле</button>
+            <button class="tab-btn" data-tab="export-data">Выгрузить данные</button>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Форма добавления поля -->
+        <div id="add-field" class="tab-content active">
+            <h2>Добавить поле в таблицу</h2>
+            <form id="add-field-form">
+                <div class="form-group">
+                    <label for="add-schema">Схема:</label>
+                    <select id="add-schema" required>
+                        <option value="">Выберите схему</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="add-table">Таблица:</label>
+                    <select id="add-table" required>
+                        <option value="">Выберите таблицу</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="field-name">Название поля:</label>
+                    <input type="text" id="field-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="field-type">Тип поля:</label>
+                    <select id="field-type" required>
+                        <option value="">Выберите тип</option>
+                        <option value="String">String</option>
+                        <option value="Int32">Int32</option>
+                        <option value="Int64">Int64</option>
+                        <option value="Float32">Float32</option>
+                        <option value="Float64">Float64</option>
+                        <option value="DateTime">DateTime</option>
+                        <option value="Date">Date</option>
+                        <option value="UUID">UUID</option>
+                        <option value="Array(String)">Array(String)</option>
+                    </select>
+                </div>
+                <button type="submit">Добавить поле</button>
+            </form>
+        </div>
+
+        <!-- Форма удаления поля -->
+        <div id="remove-field" class="tab-content">
+            <h2>Удалить поле из таблицы</h2>
+            <form id="remove-field-form">
+                <div class="form-group">
+                    <label for="remove-schema">Схема:</label>
+                    <select id="remove-schema" required>
+                        <option value="">Выберите схему</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="remove-table">Таблица:</label>
+                    <select id="remove-table" required>
+                        <option value="">Выберите таблицу</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="remove-field-name">Поле:</label>
+                    <select id="remove-field-name" required>
+                        <option value="">Выберите поле</option>
+                    </select>
+                </div>
+                <button type="submit">Удалить поле</button>
+            </form>
+        </div>
+
+        <!-- Форма выгрузки данных -->
+        <div id="export-data" class="tab-content">
+            <h2>Выгрузить данные</h2>
+            <form id="export-data-form">
+                <div class="form-group">
+                    <label for="export-schema">Схема:</label>
+                    <select id="export-schema" required>
+                        <option value="">Выберите схему</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="export-table">Таблица:</label>
+                    <select id="export-table" required>
+                        <option value="">Выберите таблицу</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="export-fields">Поля (через запятую):</label>
+                    <input type="text" id="export-fields" placeholder="field1, field2, field3" required>
+                </div>
+                <div class="form-group">
+                    <label for="time-field">Поле времени:</label>
+                    <select id="time-field" required>
+                        <option value="">Выберите поле времени</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="start-time">Начальное время:</label>
+                    <input type="datetime-local" id="start-time" required>
+                </div>
+                <div class="form-group">
+                    <label for="end-time">Конечное время:</label>
+                    <input type="datetime-local" id="end-time" required>
+                </div>
+                <button type="submit">Скачать CSV</button>
+            </form>
+        </div>
+    </main>
+
+    <div id="notification" class="notification hidden"></div>
+</div>
+
+<script src="api.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

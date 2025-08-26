@@ -237,6 +237,7 @@ services:
       - "9009:9009"
     volumes:
       - clickhouse_data:/var/lib/clickhouse
+      - ./clickhouse-config.xml:/etc/clickhouse-server/config.d/cors.xml:ro
 #      - ./clickhouse-config.xml:/etc/clickhouse-server/config.d/kafka.xml:ro
 #      - "C:/Users/vshalaev/Documents/PROJECT/Kafka/Offset_explorer/new_sert/cert_jks/kafka.keystore.jks:/opt/spark/conf/kafka.keystore.jks"
 #      - "C:/Users/vshalaev/Documents/PROJECT/Kafka/Offset_explorer/new_sert/cert_jks/kafka.truststore.jks:/opt/spark/conf/kafka.truststore.jks"

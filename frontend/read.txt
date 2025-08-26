@@ -1,0 +1,7 @@
+
+#start:
+python -m http.server 8000
+
+
+#Front:
+http://localhost:8000/
