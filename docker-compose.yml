@@ -50,6 +50,13 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@controller-1:9093,2@controller-2:9093,3@controller-3:9093
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      # Настройки логов и данных
+#      KAFKA_LOG_DIRS: /kafka/data
+#      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+#      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+#      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+#    volumes:
+#      - kafka_broker_1_data:/kafka/data  # Volume для данных брокера 1
     depends_on:
       - controller-1
       - controller-2
@@ -70,6 +77,13 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@controller-1:9093,2@controller-2:9093,3@controller-3:9093
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+#      # Настройки логов и данных
+#      KAFKA_LOG_DIRS: /kafka/data
+#      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+#      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+#      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+#      volumes:
+#        - kafka_broker_2_data:/kafka/data  # Volume для данных брокера 2
     depends_on:
       - controller-1
       - controller-2
@@ -90,6 +104,13 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@controller-1:9093,2@controller-2:9093,3@controller-3:9093
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+#      # Настройки логов и данных
+#      KAFKA_LOG_DIRS: /kafka/data
+#      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+#      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+#      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+#    volumes:
+#      - kafka_broker_3_data:/kafka/data  # Volume для данных брокера 3
     depends_on:
       - controller-1
       - controller-2
@@ -303,3 +324,7 @@ volumes:
   postgres_data:
   prometheus_data:
   grafana_data:
+  # Kafka brokers data volumes
+#  kafka_broker_1_data:
+#  kafka_broker_2_data:
+#  kafka_broker_3_data:
