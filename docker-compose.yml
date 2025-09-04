@@ -219,7 +219,7 @@ services:
       APP_TOPIC: "sandbox"
       APP_PARTITION: "0"
       APP_INTERVAL_MS: "5000"
-      REDIS_TTL_MSG_SEC: 300
+      REDIS_TTL_MSG_SEC: 600
     depends_on:
 #      - kafka-init
       - broker-1
