@@ -198,7 +198,7 @@ class ClickHouseAPI {
         }
     }
 
-    // Новая функция для тестирования подключения
+    // функция для тестирования подключения
     async testConnection() {
         try {
             const query = 'SELECT 1 as test FORMAT JSON';
@@ -208,6 +208,109 @@ class ClickHouseAPI {
         } catch (error) {
             console.error('Connection test failed:', error);
             return false;
+        }
+    }
+
+    // Получение списка моделей
+    async getModels() {
+        try {
+            const query = `
+            SELECT model_id, model_name, is_active, process_dttm 
+            FROM feature_store.ref_model 
+            ORDER BY model_id
+            FORMAT JSON
+        `;
+            const result = await this.executeQuery(query);
+
+            if (result && result.data) {
+                return result.data;
+            }
+            return [];
+
+        } catch (error) {
+            console.error('Failed to get models:', error);
+            throw error;
+        }
+    }
+
+    // Проверка существования модели по имени
+    async checkModelExists(modelName) {
+        try {
+            const query = `
+            SELECT COUNT() as count 
+            FROM feature_store.ref_model 
+            WHERE model_name = '${modelName.replace(/'/g, "''")}'
+            FORMAT JSON
+        `;
+            const result = await this.executeQuery(query);
+
+            if (result && result.data && result.data[0]) {
+                return result.data[0].count > 0;
+            }
+            return false;
+
+        } catch (error) {
+            console.error('Failed to check model existence:', error);
+            throw error;
+        }
+    }
+
+    // Получение следующего ID модели
+    async getNextModelId() {
+        try {
+            const query = `
+            SELECT COALESCE(MAX(model_id), 0) + 1 as next_id 
+            FROM feature_store.ref_model 
+            FORMAT JSON
+        `;
+            const result = await this.executeQuery(query);
+
+            if (result && result.data && result.data[0]) {
+                return result.data[0].next_id;
+            }
+            return 1;
+
+        } catch (error) {
+            console.error('Failed to get next model ID:', error);
+            throw error;
+        }
+    }
+
+    // Добавление новой модели
+    async addModel(modelName) {
+        try {
+            const nextId = await this.getNextModelId();
+            const query = `
+            INSERT INTO feature_store.ref_model (model_id, model_name, is_active, process_dttm)
+            VALUES (${nextId}, '${modelName.replace(/'/g, "''")}', 1, now())
+        `;
+
+            await this.executeQuery(query);
+            console.log(`Model ${modelName} added with ID ${nextId}`);
+            return true;
+
+        } catch (error) {
+            console.error('Failed to add model:', error);
+            throw error;
+        }
+    }
+
+    // Деактивация модели
+    async deactivateModel(modelId) {
+        try {
+            const query = `
+            ALTER TABLE feature_store.ref_model 
+            UPDATE is_active = 0 
+            WHERE model_id = ${modelId}
+        `;
+
+            await this.executeQuery(query);
+            console.log(`Model ${modelId} deactivated`);
+            return true;
+
+        } catch (error) {
+            console.error('Failed to deactivate model:', error);
+            throw error;
         }
     }
 }
