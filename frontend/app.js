@@ -2,6 +2,7 @@ class FeatureStoreApp {
     constructor() {
         this.currentSchema = null;
         this.currentTable = null;
+        this.models = [];
         this.initializeApp();
     }
 
@@ -13,9 +14,14 @@ class FeatureStoreApp {
             return;
         }
 
+        this.initializeApp = this.initializeApp.bind(this);
+        this.setupEventListeners = this.setupEventListeners.bind(this);
+        this.handleAddModel = this.handleAddModel.bind(this);
+
         this.setupTabNavigation();
         await this.loadSchemas();
         this.setupEventListeners();
+        await this.loadModels();
     }
 
     async testConnection() {
@@ -39,14 +45,28 @@ class FeatureStoreApp {
         tabButtons.forEach(button => {
             button.addEventListener('click', () => {
                 const tabId = button.dataset.tab;
+                console.log('Tab clicked:', tabId);
 
                 // Обновляем активные кнопки
                 tabButtons.forEach(btn => btn.classList.remove('active'));
                 button.classList.add('active');
 
                 // Показываем соответствующий контент
-                tabContents.forEach(content => content.classList.remove('active'));
-                document.getElementById(tabId).classList.add('active');
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                    console.log('Hiding tab:', content.id);
+                });
+
+                const activeTab = document.getElementById(tabId);
+                if (activeTab) {
+                    activeTab.classList.add('active');
+                    console.log('Showing tab:', tabId);
+
+                    // Если это вкладка моделей, обновляем список
+                    if (tabId === 'model-management') {
+                        this.loadModels();
+                    }
+                }
             });
         });
     }
@@ -174,6 +194,12 @@ class FeatureStoreApp {
             e.preventDefault();
             await this.handleExportData();
         });
+
+        // Обработчик добавления модели
+        document.getElementById('add-model-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await this.handleAddModel();
+        });
     }
 
     async handleAddField() {
@@ -265,6 +291,131 @@ class FeatureStoreApp {
         setTimeout(() => {
             notification.classList.add('hidden');
         }, 3000);
+    }
+
+    async loadModels() {
+        try {
+            this.models = await clickhouseAPI.getModels();
+            this.renderModelsList();
+        } catch (error) {
+            console.error('Failed to load models:', error);
+            this.showNotification('Ошибка загрузки списка моделей', 'error');
+        }
+    }
+
+    renderModelsList() {
+        const modelsList = document.getElementById('models-list');
+
+        if (this.models.length === 0) {
+            modelsList.innerHTML = '<p>Модели не найдены</p>';
+            return;
+        }
+
+        const table = document.createElement('table');
+        table.className = 'models-table';
+
+        table.innerHTML = `
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Название модели</th>
+                <th>Статус</th>
+                <th>Дата создания</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${this.models.map(model => `
+                <tr>
+                    <td>${model.model_id}</td>
+                    <td>${this.escapeHtml(model.model_name)}</td>
+                    <td class="${model.is_active ? 'status-active' : 'status-inactive'}">
+                        ${model.is_active ? 'Активна' : 'Неактивна'}
+                    </td>
+                    <td>${new Date(model.process_dttm).toLocaleString()}</td>
+                    <td>
+                        ${model.is_active ?
+            `<button class="deactivate-btn" data-id="${model.model_id}">Деактивировать</button>` :
+            '─'
+        }
+                    </td>
+                </tr>
+            `).join('')}
+        </tbody>
+    `;
+
+        modelsList.innerHTML = '';
+        modelsList.appendChild(table);
+
+        // Добавляем обработчики для кнопок деактивации
+        table.querySelectorAll('.deactivate-btn').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                const modelId = e.target.dataset.id;
+                await this.handleDeactivateModel(modelId);
+            });
+        });
+    }
+
+// Экранирование HTML для безопасности
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+// Обработчик добавления модели
+    async handleAddModel() {
+        const modelNameInput = document.getElementById('model-name');
+        const modelName = modelNameInput.value.trim();
+
+        if (!modelName) {
+            this.showNotification('Введите название модели', 'error');
+            return;
+        }
+
+        try {
+            // Проверяем, существует ли модель с таким именем
+            const exists = await clickhouseAPI.checkModelExists(modelName);
+            if (exists) {
+                this.showNotification('Модель с таким названием уже существует', 'error');
+                return;
+            }
+
+            // Добавляем модель
+            const success = await clickhouseAPI.addModel(modelName);
+            if (success) {
+                this.showNotification('Модель успешно добавлена', 'success');
+                modelNameInput.value = '';
+
+                // Обновляем список моделей
+                await this.loadModels();
+            }
+
+        } catch (error) {
+            console.error('Failed to add model:', error);
+            this.showNotification('Ошибка добавления модели: ' + error.message, 'error');
+        }
+    }
+
+// Обработчик деактивации модели
+    async handleDeactivateModel(modelId) {
+        if (!confirm('Вы уверены, что хотите деактивировать эту модель?')) {
+            return;
+        }
+
+        try {
+            const success = await clickhouseAPI.deactivateModel(modelId);
+            if (success) {
+                this.showNotification('Модель деактивирована', 'success');
+
+                // Обновляем список моделей
+                await this.loadModels();
+            }
+
+        } catch (error) {
+            console.error('Failed to deactivate model:', error);
+            this.showNotification('Ошибка деактивации модели', 'error');
+        }
     }
 }
 

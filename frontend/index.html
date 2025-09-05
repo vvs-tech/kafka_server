@@ -14,6 +14,7 @@
             <button class="tab-btn active" data-tab="add-field">Добавить поле</button>
             <button class="tab-btn" data-tab="remove-field">Удалить поле</button>
             <button class="tab-btn" data-tab="export-data">Выгрузить данные</button>
+            <button class="tab-btn" data-tab="model-management">Управление моделями</button>
         </nav>
     </header>
 
@@ -125,6 +126,30 @@
                 </div>
                 <button type="submit">Скачать CSV</button>
             </form>
+        </div>
+
+        <div id="model-management" class="tab-content">
+            <h2>Управление справочником моделей</h2>
+
+            <!-- Форма добавления модели -->
+            <div class="form-section">
+                <h3>Добавить новую модель</h3>
+                <form id="add-model-form">
+                    <div class="form-group">
+                        <label for="model-name">Название модели:</label>
+                        <input type="text" id="model-name" required placeholder="Введите название модели">
+                    </div>
+                    <button type="submit">Добавить модель</button>
+                </form>
+            </div>
+
+            <!-- Список существующих моделей -->
+            <div class="form-section">
+                <h3>Существующие модели</h3>
+                <div id="models-list">
+                    <p>Загрузка списка моделей...</p>
+                </div>
+            </div>
         </div>
     </main>
 
