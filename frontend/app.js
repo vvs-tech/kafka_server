@@ -17,6 +17,16 @@ class FeatureStoreApp {
         this.initializeApp = this.initializeApp.bind(this);
         this.setupEventListeners = this.setupEventListeners.bind(this);
         this.handleAddModel = this.handleAddModel.bind(this);
+        this.handleExportData = this.handleExportData.bind(this);
+
+        // Обеспечиваем существование таблиц
+        try {
+            // await clickhouseAPI.ensureModelsTable();
+            await clickhouseAPI.ensureDatasetMetaTable();
+        } catch (error) {
+            console.error('Failed to ensure tables:', error);
+            this.showNotification('Ошибка создания таблиц', 'error');
+        }
 
         this.setupTabNavigation();
         await this.loadSchemas();
@@ -239,26 +249,78 @@ class FeatureStoreApp {
         const timeField = document.getElementById('time-field').value;
         const startTime = document.getElementById('start-time').value;
         const endTime = document.getElementById('end-time').value;
+        const modelId = document.getElementById('model-id').value;
+        const description = document.getElementById('dataset-description').value;
+
+        // Валидация новых полей
+        if (!modelId) {
+            this.showNotification('Введите ID модели', 'error');
+            return;
+        }
+
+        if (parseInt(modelId) <= 0) {
+            this.showNotification('ID модели должен быть положительным числом', 'error');
+            return;
+        }
+
+        if (fields.split(',').length > 500) {
+            this.showNotification('Слишком много полей для выгрузки (максимум 500)', 'error');
+            return;
+        }
 
         try {
+            // Проверяем существование модели
+            const modelCheck = await clickhouseAPI.checkModelExistsById(parseInt(modelId));
+            if (!modelCheck.exists) {
+                this.showNotification('Модель с указанным ID не существует или не активна', 'error');
+                return;
+            }
+
             // Преобразуем формат даты-времени для ClickHouse
             const formatForClickHouse = (datetimeString) => {
                 if (!datetimeString) return '';
-                // Преобразуем "2025-08-26T17:43" в "2025-08-26 17:43:00"
                 return datetimeString.replace('T', ' ') + ':00';
             };
 
             const formattedStartTime = formatForClickHouse(startTime);
             const formattedEndTime = formatForClickHouse(endTime);
 
+            // Формируем SQL скрипт для выгрузки
+            const fieldList = fields.split(',').map(f => f.trim()).join(', ');
+            const datasetScript = `SELECT ${fieldList} FROM ${schema}.${table} WHERE ${timeField} >= '${formattedStartTime}' AND ${timeField} <= '${formattedEndTime}'`;
+
             console.log('Formatted times:', { start: formattedStartTime, end: formattedEndTime });
 
+            // Подготавливаем метаданные для сохранения
+            const metaData = {
+                dataset_meta_id: await clickhouseAPI.getNextDatasetMetaId(),
+                user_id: clickhouseAPI.generateRandomUserId(),
+                user_login: clickhouseAPI.generateRandomUserLogin(),
+                model_id: parseInt(modelId),
+                model_name: modelCheck.model_name,
+                dataset_script: datasetScript,
+                feature_num: fields.split(',').length,
+                feature_list: fields.split(',').map(f => f.trim()),
+                dataset_begin_dttm: formattedStartTime,
+                dataset_end_dttm: formattedEndTime,
+                description: description,
+                dataset_dttm: new Date().toISOString().replace('T', ' ').substring(0, 19)
+            };
+
+            console.log('Dataset metadata:', metaData);
+
+            // Сохраняем метаданные
+            await clickhouseAPI.saveDatasetMeta(metaData);
+            this.showNotification('Метаданные датасета сохранены', 'success');
+
+            // Выполняем выгрузку данных
             const csvData = await clickhouseAPI.exportData(
                 schema, table, fields, timeField, formattedStartTime, formattedEndTime
             );
 
             this.downloadCSV(csvData, `${schema}_${table}_export.csv`);
             this.showNotification('Данные успешно выгружены', 'success');
+
         } catch (error) {
             console.error('Ошибка выгрузки данных:', error);
             this.showNotification('Ошибка выгрузки данных: ' + error.message, 'error');

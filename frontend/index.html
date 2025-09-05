@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ClickHouse Feature Store Manager</title>
+    <title>Feature Store Manager</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="container">
     <header>
-        <h1>ClickHouse Feature Store Manager</h1>
+        <h1>Feature Store Manager</h1>
         <nav>
             <button class="tab-btn active" data-tab="add-field">Добавить поле</button>
             <button class="tab-btn" data-tab="remove-field">Удалить поле</button>
@@ -123,6 +123,14 @@
                 <div class="form-group">
                     <label for="end-time">Конечное время:</label>
                     <input type="datetime-local" id="end-time" required>
+                </div>
+                <div class="form-group">
+                    <label for="model-id">ID модели:</label>
+                    <input type="number" id="model-id" min="1" required placeholder="Введите ID модели">
+                </div>
+                <div class="form-group">
+                    <label for="dataset-description">Описание датасета:</label>
+                    <textarea id="dataset-description" rows="3" placeholder="Опишите назначение датасета"></textarea>
                 </div>
                 <button type="submit">Скачать CSV</button>
             </form>
