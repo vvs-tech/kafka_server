@@ -183,6 +183,22 @@ button[type="submit"]:hover {
     color: #e74c3c;
 }
 
+textarea {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 80px;
+}
+
+textarea:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
 .loading {
     opacity: 0.6;
     pointer-events: none;
