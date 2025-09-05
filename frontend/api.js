@@ -313,6 +313,146 @@ class ClickHouseAPI {
             throw error;
         }
     }
+
+
+    // Создание таблицы dataset_meta если не существует
+    async ensureDatasetMetaTable() {
+        try {
+            const query = `
+            CREATE TABLE IF NOT EXISTS feature_store.dataset_meta
+            (
+                dataset_meta_id UInt64 not null, 
+                user_id UInt64 not null,
+                user_login String not null,
+                model_id UInt64 not null,
+                model_name String not null,
+                dataset_script String not null,
+                feature_num UInt16 not null,
+                feature_list Array(String) not null,
+                dataset_begin_dttm DateTime not null,
+                dataset_end_dttm DateTime not null,
+                description String null,
+                dataset_dttm DateTime not null,
+                process_dttm DateTime DEFAULT now()
+            )
+            ENGINE = MergeTree
+            PARTITION BY (toYYYYMMDD(dataset_dttm)) 
+            ORDER BY (model_id)
+            SETTINGS index_granularity = 8192
+        `;
+
+            await this.executeQuery(query);
+            console.log('Table feature_store.dataset_meta ensured');
+            return true;
+
+        } catch (error) {
+            console.error('Failed to ensure dataset_meta table:', error);
+            throw error;
+        }
+    }
+
+    // Получение следующего ID для dataset_meta
+    async getNextDatasetMetaId() {
+        try {
+            const query = `
+            SELECT COALESCE(MAX(dataset_meta_id), 0) + 1 as next_id 
+            FROM feature_store.dataset_meta 
+            FORMAT JSON
+        `;
+            const result = await this.executeQuery(query);
+
+            if (result && result.data && result.data[0]) {
+                return result.data[0].next_id;
+            }
+            return 1;
+
+        } catch (error) {
+            console.error('Failed to get next dataset meta ID:', error);
+            return 1;
+        }
+    }
+
+    // Проверка существования модели по ID
+    async checkModelExistsById(modelId) {
+        try {
+            const query = `
+            SELECT COUNT() as count, any(model_name) as model_name
+            FROM feature_store.ref_model 
+            WHERE model_id = ${modelId} AND is_active = 1
+            FORMAT JSON
+        `;
+            const result = await this.executeQuery(query);
+
+            if (result && result.data && result.data[0]) {
+                return {
+                    exists: result.data[0].count > 0,
+                    model_name: result.data[0].model_name || ''
+                };
+            }
+            return { exists: false, model_name: '' };
+
+        } catch (error) {
+            console.error('Failed to check model existence by ID:', error);
+            return { exists: false, model_name: '' };
+        }
+    }
+
+    // Генерация случайного user_id
+    generateRandomUserId() {
+        return Math.floor(Math.random() * 1000000000); // До 1 миллиарда
+    }
+
+    // Генерация случайного user_login
+    generateRandomUserLogin() {
+        const chars = 'abcdefghijklmnopqrstuvwxyz';
+        let result = '';
+        for (let i = 0; i < 10; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
+    }
+
+    // Сохранение метаданных датасета
+    async saveDatasetMeta(metaData) {
+        try {
+            const {
+                dataset_meta_id,
+                user_id,
+                user_login,
+                model_id,
+                model_name,
+                dataset_script,
+                feature_num,
+                feature_list,
+                dataset_begin_dttm,
+                dataset_end_dttm,
+                description,
+                dataset_dttm
+            } = metaData;
+
+            const featureListStr = feature_list.map(f => `'${f.replace(/'/g, "''")}'`).join(', ');
+
+            const query = `
+            INSERT INTO feature_store.dataset_meta (
+                dataset_meta_id, user_id, user_login, model_id, model_name,
+                dataset_script, feature_num, feature_list,
+                dataset_begin_dttm, dataset_end_dttm, description, dataset_dttm
+            ) VALUES (
+                ${dataset_meta_id}, ${user_id}, '${user_login}', ${model_id}, '${model_name.replace(/'/g, "''")}',
+                '${dataset_script.replace(/'/g, "''")}', ${feature_num}, [${featureListStr}],
+                '${dataset_begin_dttm}', '${dataset_end_dttm}', ${description ? `'${description.replace(/'/g, "''")}'` : 'NULL'}, '${dataset_dttm}'
+            )
+        `;
+
+            await this.executeQuery(query);
+            console.log('Dataset metadata saved successfully');
+            return true;
+
+        } catch (error) {
+            console.error('Failed to save dataset metadata:', error);
+            throw error;
+        }
+    }
 }
 
 // Создаем глобальный экземпляр API
