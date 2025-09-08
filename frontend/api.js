@@ -453,6 +453,31 @@ class ClickHouseAPI {
             throw error;
         }
     }
+
+    // Получение метаданных датасета по ID
+    async getDatasetMetaById(datasetMetaId) {
+        try {
+            const query = `
+        SELECT 
+            feature_list,
+            dataset_begin_dttm,
+            dataset_end_dttm,
+            model_id,
+            description
+        FROM feature_store.dataset_meta 
+        WHERE dataset_meta_id = ${parseInt(datasetMetaId)}
+        FORMAT JSON
+    `;
+            const result = await this.executeQuery(query);
+            if (result && result.data && result.data.length > 0) {
+                return result.data[0];
+            }
+            return null;
+        } catch (error) {
+            console.error('Failed to get dataset metadata by ID:', error);
+            throw error;
+        }
+    }
 }
 
 // Создаем глобальный экземпляр API

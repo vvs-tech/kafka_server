@@ -94,6 +94,11 @@
         <div id="export-data" class="tab-content">
             <h2>Выгрузить данные</h2>
             <form id="export-data-form">
+                <div class="form-group" style="display: flex; gap: 10px; align-items: center;">
+                    <label for="dataset-meta-id" style="width: auto; margin-bottom: 0;">ID метаданных датасета:</label>
+                    <input type="number" id="dataset-meta-id" min="1" placeholder="Введите ID" style="flex-grow: 1;">
+                    <button type="button" id="fill-by-meta-id-btn" style="padding: 10px 15px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer;">Заполнить</button>
+                </div>
                 <div class="form-group">
                     <label for="export-schema">Схема:</label>
                     <select id="export-schema" required>

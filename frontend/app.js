@@ -210,6 +210,16 @@ class FeatureStoreApp {
             e.preventDefault();
             await this.handleAddModel();
         });
+
+        document.getElementById('fill-by-meta-id-btn').addEventListener('click', async () => {
+            const metaIdInput = document.getElementById('dataset-meta-id');
+            const metaId = metaIdInput.value.trim();
+            if (!metaId || isNaN(metaId)) {
+                this.showNotification('Введите корректный ID метаданных', 'error');
+                return;
+            }
+            await this.handleFillFormByDatasetMetaId(metaId);
+        });
     }
 
     async handleAddField() {
@@ -479,6 +489,64 @@ class FeatureStoreApp {
             this.showNotification('Ошибка деактивации модели', 'error');
         }
     }
+
+    // Новый метод для заполнения формы на основе ID метаданных
+    async handleFillFormByDatasetMetaId(datasetMetaId) {
+        try {
+            const metaData = await clickhouseAPI.getDatasetMetaById(datasetMetaId);
+            if (!metaData) {
+                this.showNotification('Метаданные с указанным ID не найдены', 'error');
+                return;
+            }
+
+            // 2.2 Заполняем поля (через запятую)
+            const fieldsInput = document.getElementById('export-fields');
+            if (metaData.feature_list && Array.isArray(metaData.feature_list)) {
+                fieldsInput.value = metaData.feature_list.join(', ');
+            } else {
+                fieldsInput.value = '';
+            }
+
+            // 2.3 Заполняем временные диапазоны
+            const startTimeInput = document.getElementById('start-time');
+            const endTimeInput = document.getElementById('end-time');
+
+            // Функция для конвертации формата DateTime ClickHouse в формат datetime-local
+            const convertToInputFormat = (clickhouseDateTime) => {
+                if (!clickhouseDateTime) return '';
+                // Ожидаем формат "YYYY-MM-DD HH:MM:SS"
+                const [datePart, timePart] = clickhouseDateTime.split(' ');
+                if (datePart && timePart) {
+                    return `${datePart}T${timePart.substring(0, 5)}`; // Обрезаем до минут
+                }
+                return '';
+            };
+
+            startTimeInput.value = convertToInputFormat(metaData.dataset_begin_dttm);
+            endTimeInput.value = convertToInputFormat(metaData.dataset_end_dttm);
+
+            // 2.4 Заполняем ID модели
+            const modelIdInput = document.getElementById('model-id');
+            modelIdInput.value = metaData.model_id || '';
+
+            // 2.5 Заполняем описание
+            const descriptionInput = document.getElementById('dataset-description');
+            descriptionInput.value = metaData.description || '';
+
+            // 2.1 Схема и Таблица остаются пустыми (как и требовалось)
+            document.getElementById('export-schema').value = '';
+            document.getElementById('export-table').value = '';
+            document.getElementById('time-field').value = ''; // Также очищаем поле времени, так как оно зависит от таблицы
+
+            this.showNotification('Форма успешно заполнена на основе метаданных', 'success');
+
+        } catch (error) {
+            console.error('Ошибка при заполнении формы:', error);
+            this.showNotification('Ошибка: ' + error.message, 'error');
+        }
+    }
+
+
 }
 
 // Инициализация приложения при загрузке страницы
