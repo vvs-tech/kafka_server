@@ -190,7 +190,7 @@ services:
     restart: unless-stopped
 
   postgres:
-    image: postgres:16-alpine
+    image: postgres:17.6
     container_name: postgres-for-kafka
     environment:
       POSTGRES_DB: kafka_db
@@ -303,11 +303,17 @@ services:
       SPRING_KAFKA_PROPERTIES_SSL_KEY_PASSWORD: "wAUyWEpL<>tWU9VxcAipcZP"
       SPRING_KAFKA_CONSUMER_GROUP_ID: "clickhouse-group"
       KAFKA_TOPIC: "sandbox"
-      CLICKHOUSE_URL: "jdbc:clickhouse://stpimc-00chp001.innodev.local:8443/default?ssl=true&sslMode=NONE"
+      CLICKHOUSE_URL: "jdbc:clickhouse://stpimc-00chp001.innodev.local:8443/default?ssl=true&sslMode=STRICT"
       CLICKHOUSE_USER: "fs2_admin"
       CLICKHOUSE_PASSWORD: "ST^a@TbkBae%uScIiOX(*W#cnOERIV1DaBP5XB85c~~V6_IxPQiqq~g_YxPsML37"
       CLICKHOUSE_BATCH_SIZE: "1000"
       CLICKHOUSE_BATCH_TIMEOUT_MS: "5000"
+      JAVA_TOOL_OPTIONS: >
+        -Djavax.net.ssl.trustStore=/certs/kafka.truststore.jks
+        -Djavax.net.ssl.trustStorePassword=wAUyWEpL<>tWU9VxcAipcZP
+        -Djavax.net.ssl.keyStore=/certs/kafka.keystore.jks
+        -Djavax.net.ssl.keyStorePassword=wAUyWEpL<>tWU9VxcAipcZP
+        -Djavax.net.debug=ssl
 #      SPRING_DATASOURCE_CLICKHOUSE_URL: "jdbc:clickhouse://clickhouse-server:8123/default"
 #      SPRING_DATASOURCE_CLICKHOUSE_USERNAME: "default"
 #      SPRING_DATASOURCE_CLICKHOUSE_PASSWORD: "default"
