@@ -303,7 +303,7 @@ services:
       SPRING_KAFKA_PROPERTIES_SSL_KEY_PASSWORD: "wAUyWEpL<>tWU9VxcAipcZP"
       SPRING_KAFKA_CONSUMER_GROUP_ID: "clickhouse-group"
       KAFKA_TOPIC: "sandbox"
-      CLICKHOUSE_URL: "jdbc:clickhouse://stpimc-00chp001.innodev.local:8443/default?ssl=true&sslMode=STRICT"
+      CLICKHOUSE_URL: "jdbc:clickhouse://stpimc-00chp001.innodev.local:8443/default?ssl=true&sslMode=NONE"
       CLICKHOUSE_USER: "fs2_admin"
       CLICKHOUSE_PASSWORD: "ST^a@TbkBae%uScIiOX(*W#cnOERIV1DaBP5XB85c~~V6_IxPQiqq~g_YxPsML37"
       CLICKHOUSE_BATCH_SIZE: "1000"
