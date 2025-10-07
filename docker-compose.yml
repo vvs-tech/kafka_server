@@ -190,7 +190,7 @@ services:
     restart: unless-stopped
 
   postgres:
-    image: postgres:latest
+    image: postgres:16-alpine
     container_name: postgres-for-kafka
     environment:
       POSTGRES_DB: kafka_db
@@ -215,11 +215,19 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: "broker-1:19092,broker-2:19092,broker-3:19092"
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: "stpimc-00kfp002.innodev.local:9092,stpimc-00kfp003.innodev.local:9092,stpimc-00kfp004.innodev.local:9092"
+      SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL: "SSL"
+      SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION: "/certs/kafka.truststore.jks"
+      SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_PASSWORD: "wAUyWEpL<>tWU9VxcAipcZP"
+      SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION: "/certs/kafka.keystore.jks"
+      SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_PASSWORD: "wAUyWEpL<>tWU9VxcAipcZP"
+      SPRING_KAFKA_PROPERTIES_SSL_KEY_PASSWORD: "wAUyWEpL<>tWU9VxcAipcZP"
       APP_TOPIC: "sandbox"
       APP_PARTITION: "0"
       APP_INTERVAL_MS: "5000"
       REDIS_TTL_MSG_SEC: 3600
+    volumes:
+      - ./certs:/certs:ro
     depends_on:
 #      - kafka-init
       - broker-1
@@ -285,23 +293,32 @@ services:
     ports:
       - "8081:8080"
     environment:
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: "broker-1:19092,broker-2:19092,broker-3:19092"
+#      SPRING_KAFKA_BOOTSTRAP_SERVERS: "broker-1:19092,broker-2:19092,broker-3:19092"
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: "stpimc-00kfp002.innodev.local:9092,stpimc-00kfp003.innodev.local:9092,stpimc-00kfp004.innodev.local:9092"
+      SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL: "SSL"
+      SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION: "/certs/kafka.truststore.jks"
+      SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_PASSWORD: "wAUyWEpL<>tWU9VxcAipcZP"
+      SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION: "/certs/kafka.keystore.jks"
+      SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_PASSWORD: "wAUyWEpL<>tWU9VxcAipcZP"
+      SPRING_KAFKA_PROPERTIES_SSL_KEY_PASSWORD: "wAUyWEpL<>tWU9VxcAipcZP"
       SPRING_KAFKA_CONSUMER_GROUP_ID: "clickhouse-group"
       KAFKA_TOPIC: "sandbox"
-      CLICKHOUSE_URL: "jdbc:clickhouse://clickhouse-server:8123/default"
-      CLICKHOUSE_USER: "default"
-      CLICKHOUSE_PASSWORD: "default"
+      CLICKHOUSE_URL: "jdbc:clickhouse://stpimc-00chp001.innodev.local:8443/default?ssl=true&sslMode=STRICT"
+      CLICKHOUSE_USER: "fs2_admin"
+      CLICKHOUSE_PASSWORD: "ST^a@TbkBae%uScIiOX(*W#cnOERIV1DaBP5XB85c~~V6_IxPQiqq~g_YxPsML37"
       CLICKHOUSE_BATCH_SIZE: "1000"
       CLICKHOUSE_BATCH_TIMEOUT_MS: "5000"
-      SPRING_DATASOURCE_CLICKHOUSE_URL: "jdbc:clickhouse://clickhouse-server:8123/default"
-      SPRING_DATASOURCE_CLICKHOUSE_USERNAME: "default"
-      SPRING_DATASOURCE_CLICKHOUSE_PASSWORD: "default"
+#      SPRING_DATASOURCE_CLICKHOUSE_URL: "jdbc:clickhouse://clickhouse-server:8123/default"
+#      SPRING_DATASOURCE_CLICKHOUSE_USERNAME: "default"
+#      SPRING_DATASOURCE_CLICKHOUSE_PASSWORD: "default"
       SPRING_DATA_REDIS_HOST: redis-for-kafka
       SPRING_DATA_REDIS_PORT: 6379
       SPRING_DATA_REDIS_TIMEOUT: 5000
       SPRING_DATA_REDIS_DATABASE: 0
       KAFKA_DLQ_TOPIC_NAME: "dlq_messages"
       KAFKA_USQ_TOPIC_NAME: "usq_messages"
+    volumes:
+      - ./certs:/certs:ro
     depends_on:
       broker-1:
         condition: service_started
