@@ -215,19 +215,34 @@ services:
     ports:
       - "8080:8080"
     environment:
+#      SPRING_KAFKA_BOOTSTRAP_SERVERS: "broker-1:19092,broker-2:19092,broker-3:19092"
       SPRING_KAFKA_BOOTSTRAP_SERVERS: "stpimc-00kfp002.innodev.local:9092,stpimc-00kfp003.innodev.local:9092,stpimc-00kfp004.innodev.local:9092"
+#      SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL: "NO_SSL"
       SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL: "SSL"
-      SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION: "/certs/kafka.truststore.jks"
-      SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_PASSWORD: "wAUyWEpL<>tWU9VxcAipcZP"
-      SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION: "/certs/kafka.keystore.jks"
-      SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_PASSWORD: "wAUyWEpL<>tWU9VxcAipcZP"
-      SPRING_KAFKA_PROPERTIES_SSL_KEY_PASSWORD: "wAUyWEpL<>tWU9VxcAipcZP"
+#      SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION: "/certs/kafka.truststore.jks"
+#      SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_PASSWORD: "wAUyWEpL<>tWU9VxcAipcZP"
+#      SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION: "/certs/kafka.keystore.jks"
+#      SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_PASSWORD: "wAUyWEpL<>tWU9VxcAipcZP"
+#      SPRING_KAFKA_PROPERTIES_SSL_KEY_PASSWORD: "wAUyWEpL<>tWU9VxcAipcZP"
+      SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION: "/certs_v2/truststore.pfx"
+      SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_PASSWORD: "n0MtVs!wafe0w"
+      SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION: "/certs_v2/keystore.pfx"
+      SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_PASSWORD: "n0MtVs!wafe0w"
+      SPRING_KAFKA_PROPERTIES_SSL_KEY_PASSWORD: "n0MtVs!wafe0w"
+#      JAVA_OPTS: |
+#        -Djavax.net.ssl.keyStore=/certs_v2/keystore.pfx
+#        -Djavax.net.ssl.keyStoreType=PKCS12
+#        -Djavax.net.ssl.keyStorePassword="n0MtVs!wafe0w"
+#        -Djavax.net.ssl.trustStore=/certs_v2/truststore.pfx
+#        -Djavax.net.ssl.trustStoreType=PKCS12
+#        -Djavax.net.ssl.trustStorePassword="n0MtVs!wafe0w"
       APP_TOPIC: "sandbox"
       APP_PARTITION: "0"
       APP_INTERVAL_MS: "5000"
       REDIS_TTL_MSG_SEC: 3600
     volumes:
       - ./certs:/certs:ro
+      - ./certs_v2:/certs_v2:ro
     depends_on:
 #      - kafka-init
       - broker-1
@@ -252,6 +267,8 @@ services:
 #      - "C:/Users/vshalaev/Documents/PROJECT/Kafka/Offset_explorer/new_sert/ca.crt:/opt/spark/conf/client.crt"
 #      - "C:/Users/vshalaev/Documents/PROJECT/Kafka/Offset_explorer/new_sert/cert.pem:/opt/spark/conf/ca-cert.pem"
 #      - "C:/Users/vshalaev/Documents/PROJECT/Kafka/Offset_explorer/new_sert/key.pem:/opt/spark/conf/client.key"
+    networks:
+      - default
     environment:
       - CLICKHOUSE_USER=default
       - CLICKHOUSE_PASSWORD=default
@@ -293,9 +310,10 @@ services:
     ports:
       - "8081:8080"
     environment:
-#      SPRING_KAFKA_BOOTSTRAP_SERVERS: "broker-1:19092,broker-2:19092,broker-3:19092"
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: "stpimc-00kfp002.innodev.local:9092,stpimc-00kfp003.innodev.local:9092,stpimc-00kfp004.innodev.local:9092"
-      SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL: "SSL"
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: "broker-1:19092,broker-2:19092,broker-3:19092"
+#      SPRING_KAFKA_BOOTSTRAP_SERVERS: "stpimc-00kfp002.innodev.local:9092,stpimc-00kfp003.innodev.local:9092,stpimc-00kfp004.innodev.local:9092"
+#      SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL: "SSL"
+      SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL: "NO_SSL"
       SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION: "/certs/kafka.truststore.jks"
       SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_PASSWORD: "wAUyWEpL<>tWU9VxcAipcZP"
       SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION: "/certs/kafka.keystore.jks"

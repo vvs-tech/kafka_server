@@ -74,6 +74,35 @@ kafka-metadata-quorum.bat --bootstrap-server localhost:29092 describe --status
 
     4) kafka-topics.bat --bootstrap-server localhost:29092 --describe --topic sandbox
 
+2. Чтобы посмотреть информацию о consumer groups:
+ 1. kafka-consumer-groups.sh (или .bat на Windows)
+    Это основная утилита Kafka CLI для работы с consumer groups.
+
+    Основные команды:
+    Посмотреть список всех consumer groups:
+
+            kafka-consumer-groups.sh --bootstrap-server <broker:port> --list
+
+    Посмотреть состояние конкретной consumer group (offsets, lag и т.д.):
+
+        kafka-consumer-groups.bat --bootstrap-server localhost:29092 --describe --group fs-raw-dump-group
+
+
+    Вывод будет примерно таким:
+
+
+    GROUP             TOPIC    PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG
+    clickhouse-group  sandbox  0          12345           12500           155
+    clickhouse-group  sandbox  1          12000           12000           0
+    CURRENT-OFFSET — последний закоммиченный offset
+    LOG-END-OFFSET — последнее сообщение в партиции
+    LAG = LOG-END-OFFSET - CURRENT-OFFSET → сколько сообщений ещё не обработано
+
+    🚫 Удалить consumer group (только если она неактивна):
+
+    kafka-consumer-groups.sh --bootstrap-server localhost:9092 --delete --group fs-raw-dump-group
+    ⚠️ Удаление возможно только для неактивных групп (consumer не запущен).
+
 --<<< --- Kafka --------- Создание топика -----------
 
 
@@ -86,7 +115,7 @@ kafka-metadata-quorum.bat --bootstrap-server localhost:29092 describe --status
 
 2. Прием сообщений:
     1) Выполнить: kafka-console-consumer.bat --bootstrap-server localhost:39092 --topic sandbox
-                  kafka-console-consumer.bat --bootstrap-server localhost:39092 --topic sandbox --formatter "kafka.tools.DefaultMessageFormatter" --property print.key=true --property print.partition=true --property print.timestamp=true --from-beginning
+                  kafka-console-consumer.bat --bootstrap-server localhost:39092 --topic sandbox --formatter "kafka.tools.DefaultMessageFormatter" --property print.key=true --property print.partition=true --property print.timestamp=true --property print.offset=true --from-beginning
 
                   С фильтрацией по партиции:
                   kafka-console-consumer.bat --bootstrap-server localhost:39092 --topic sandbox --partition 2 --property print.key=true --property print.partition=true --from-beginning
@@ -129,6 +158,24 @@ kafka-metadata-quorum.bat --bootstrap-server localhost:29092 describe --status
 
 
 
+
+
+--->>>>>>>>>>>============================================ Рабочий вариант конвертации сертификатов из pfx в jks  ===================================================================================
+
+n0MtVs!wafe0w
+
+
+Конвертация сертификатов:
+keytool.exe -importkeystore -srckeystore "C:/Users/vshalaev/Documents/PROJECT/Kafka/cert_20251126/v1/keystore.pfx" -srcstoretype PKCS12 -destkeystore "C:/Users/vshalaev/Documents/PROJECT/Kafka/cert_20251126/v1/keystore.jks" -deststoretype pkcs12 -deststorepass 'n0MtVs!wafe0w'
+keytool.exe -importkeystore -srckeystore "C:/Users/vshalaev/Documents/PROJECT/Kafka/cert_20251126/v1/truststore.pfx" -srcstoretype PKCS12 -destkeystore "C:/Users/vshalaev/Documents/PROJECT/Kafka/cert_20251126/v1/truststore.jks" -deststoretype pkcs12 -deststorepass 'n0MtVs!wafe0w'
+
+
+проверка сертификатов:
+keytool.exe -list -v -keystore "C:/Users/vshalaev/Documents/PROJECT/Kafka/cert_20251126/v1/truststore.jks"
+keytool.exe -list -v -keystore "C:/Users/vshalaev/Documents/PROJECT/Kafka/cert_20251126/v1/keystore.jks"
+
+
+---<<<<<<<<<<<<============================================ Рабочий вариант конвертации сертификатов из pfx в jks  ===================================================================================
 
 
 
