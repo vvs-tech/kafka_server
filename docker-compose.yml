@@ -310,27 +310,41 @@ services:
     ports:
       - "8081:8080"
     environment:
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: "broker-1:19092,broker-2:19092,broker-3:19092"
-#      SPRING_KAFKA_BOOTSTRAP_SERVERS: "stpimc-00kfp002.innodev.local:9092,stpimc-00kfp003.innodev.local:9092,stpimc-00kfp004.innodev.local:9092"
-#      SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL: "SSL"
-      SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL: "NO_SSL"
-      SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION: "/certs/kafka.truststore.jks"
-      SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_PASSWORD: "wAUyWEpL<>tWU9VxcAipcZP"
-      SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION: "/certs/kafka.keystore.jks"
-      SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_PASSWORD: "wAUyWEpL<>tWU9VxcAipcZP"
-      SPRING_KAFKA_PROPERTIES_SSL_KEY_PASSWORD: "wAUyWEpL<>tWU9VxcAipcZP"
+#      SPRING_KAFKA_BOOTSTRAP_SERVERS: "broker-1:19092,broker-2:19092,broker-3:19092"
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: "stpimc-00kfp002.innodev.local:9092,stpimc-00kfp003.innodev.local:9092,stpimc-00kfp004.innodev.local:9092"
+      SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL: "SSL"
+#      SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL: "NO_SSL"
+#      SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION: "/certs/kafka.truststore.jks"
+#      SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_PASSWORD: "wAUyWEpL<>tWU9VxcAipcZP"
+#      SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION: "/certs/kafka.keystore.jks"
+#      SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_PASSWORD: "wAUyWEpL<>tWU9VxcAipcZP"
+#      SPRING_KAFKA_PROPERTIES_SSL_KEY_PASSWORD: "wAUyWEpL<>tWU9VxcAipcZP"
+      SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION: "/certs_v2/truststore.pfx"
+      SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_PASSWORD: "n0MtVs!wafe0w"
+      SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION: "/certs_v2/keystore.pfx"
+      SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_PASSWORD: "n0MtVs!wafe0w"
+      SPRING_KAFKA_PROPERTIES_SSL_KEY_PASSWORD: "n0MtVs!wafe0w"
       SPRING_KAFKA_CONSUMER_GROUP_ID: "clickhouse-group"
       KAFKA_TOPIC: "sandbox"
-      CLICKHOUSE_URL: "jdbc:clickhouse://stpimc-00chp001.innodev.local:8443/default?ssl=true&sslMode=STRICT"
-      CLICKHOUSE_USER: "fs2_admin"
-      CLICKHOUSE_PASSWORD: "ST^a@TbkBae%uScIiOX(*W#cnOERIV1DaBP5XB85c~~V6_IxPQiqq~g_YxPsML37"
+#      CLICKHOUSE_URL: "jdbc:clickhouse://stpimc-00chp001.innodev.local:8443/default?ssl=true&sslMode=STRICT"
+#      CLICKHOUSE_USER: "fs2_admin"
+#      CLICKHOUSE_PASSWORD: "ST^a@TbkBae%uScIiOX(*W#cnOERIV1DaBP5XB85c~~V6_IxPQiqq~g_YxPsML37"
+      CLICKHOUSE_URL: "jdbc:clickhouse://stpimc-00chp009.innodev.local:8443/default?ssl=true&sslMode=STRICT"
+      CLICKHOUSE_USER: "admin"
+      CLICKHOUSE_PASSWORD: "QMYk1p90y2$TumihTtAStuUoXp@Y6!QcxbbXDo4s03$WWRmyCOvFwColF8LpbuhGH"
       CLICKHOUSE_BATCH_SIZE: "1000"
       CLICKHOUSE_BATCH_TIMEOUT_MS: "5000"
+#      JAVA_TOOL_OPTIONS: >
+#        -Djavax.net.ssl.trustStore=/certs/kafka.truststore.jks
+#        -Djavax.net.ssl.trustStorePassword=wAUyWEpL<>tWU9VxcAipcZP
+#        -Djavax.net.ssl.keyStore=/certs/kafka.keystore.jks
+#        -Djavax.net.ssl.keyStorePassword=wAUyWEpL<>tWU9VxcAipcZP
+#        -Djavax.net.debug=ssl
       JAVA_TOOL_OPTIONS: >
-        -Djavax.net.ssl.trustStore=/certs/kafka.truststore.jks
-        -Djavax.net.ssl.trustStorePassword=wAUyWEpL<>tWU9VxcAipcZP
-        -Djavax.net.ssl.keyStore=/certs/kafka.keystore.jks
-        -Djavax.net.ssl.keyStorePassword=wAUyWEpL<>tWU9VxcAipcZP
+        -Djavax.net.ssl.trustStore=/certs_v2/truststore.jks
+        -Djavax.net.ssl.trustStorePassword=n0MtVs!wafe0w
+        -Djavax.net.ssl.keyStore=/certs_v2/keystore.jks
+        -Djavax.net.ssl.keyStorePassword=n0MtVs!wafe0w
         -Djavax.net.debug=ssl
 #      SPRING_DATASOURCE_CLICKHOUSE_URL: "jdbc:clickhouse://clickhouse-server:8123/default"
 #      SPRING_DATASOURCE_CLICKHOUSE_USERNAME: "default"
@@ -343,6 +357,7 @@ services:
       KAFKA_USQ_TOPIC_NAME: "usq_messages"
     volumes:
       - ./certs:/certs:ro
+      - ./certs_v2:/certs_v2:ro
     depends_on:
       broker-1:
         condition: service_started
@@ -355,10 +370,104 @@ services:
     networks:
       - default
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  fs-consumer-raw-dump-local:
+    image: st45/fs-consumer-raw-dump:latest
+    container_name: fs-consumer-raw-dump-local-service
+    ports:
+      - "8084:8080"
+    environment:
+      #-->> local Click -------------------------------------------------------------
+      ###CH_URL: jdbc:clickhouse://localhost:8123/default
+      CH_URL: jdbc:clickhouse://clickhouse-server:8123/default
+      CH_PORT: 8443
+      CH_USER: default
+      CH_SECURITY_PROTOCOL: NO
+      CH_PASSWORD: default
+      #-->> local Click  -------------------------------------------------------------
+
+#      CH_URL: "jdbc:clickhouse://stpimc-00chp009.innodev.local:8443,stpimc-00chp011.innodev.local:8443,stpimc-00chp003.innodev.local:8443,stpimc-00chp001.innodev.local:8443,stpimc-00chp012.innodev.local:8443,stpimc-00chp005.innodev.local:8443/default?ssl=true&sslMode=STRICT"
+#      CH_USER: admin
+#      CH_SECURITY_PROTOCOL: SSL
+
+      CH_ENABLE_QUORUM_INSERT: false
+      CH_QUORUM_SIZE: 1
+      CH_QUORUM_TIMEOUT_MS: 60000
+
+      #KAFKA_CONSUMER_BOOTSTRAP_SERVERS: broker-1:19092,broker-2:19092,broker-3:19092
+      KAFKA_CONSUMER_BOOTSTRAP_SERVERS: stpimc-00kfp002.innodev.local:9092,stpimc-00kfp003.innodev.local:9092,stpimc-00kfp004.innodev.local:9092
+
+      #KAFKA_PRODUCER_BOOTSTRAP_SERVERS: broker-1:19092,broker-2:19092,broker-3:19092
+      KAFKA_PRODUCER_BOOTSTRAP_SERVERS: stpimc-00kfp002.innodev.local:9092,stpimc-00kfp003.innodev.local:9092,stpimc-00kfp004.innodev.local:9092
+      FETCH_MAX_BYTES_CONFIG: 52428800
+      MAX_PARTITION_FETCH_BYTES_CONFIG: 5048576
+      FETCH_MIN_BYTES_CONFIG: 1048576
+      FETCH_MAX_WAIT_MS_CONFIG: 950
+      MAX_POLL_RECORDS_CONFIG: 8000
+      SCHEDULED_FLUSH_MC_CONFIG: 1000
+      CH_DRIVER_CLASS_NAME: com.clickhouse.jdbc.ClickHouseDriver
+      CLICKHOUSE_RETRY_MAX_ATTEMPTS: 20
+      CLICKHOUSE_RETRY_INITIAL_DELAY_MS: 1000
+      CLICKHOUSE_RETRY_MULTIPLIER: 2.0
+
+      #KAFKA_PROPERTIES_SECURITY_PROTOCOL: NO_SSL
+      KAFKA_PROPERTIES_SECURITY_PROTOCOL: SSL
+      KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION: /certs_v2/truststore.pfx
+      #KAFKA_PROPERTIES_SSL_TRUSTSTORE_PASSWORD:
+      KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION: /certs_v2/keystore.pfx
+      #KAFKA_PROPERTIES_SSL_KEYSTORE_PASSWORD:
+      #KAFKA_PROPERTIES_SSL_KEY_PASSWORD:
+
+      KAFKA_DLQ_TOPIC_NAME: dlq_messages
+      KAFKA_USQ_TOPIC_NAME: fs_test01_dlq
+      SERVICE_PROPERTIES_ADD_ROW_BATCH_INFO: 2000
+      SERVICE_PROPERTIES_JSON_TO_FLAT: 0
+      SERVICE_PROPERTIES_VALIDATING_MSG_TYPE_COLUMN: 1
+
+      JAVA_TOOL_OPTIONS: >
+        -Djavax.net.ssl.trustStore=/certs_v2/truststore.jks
+        -Djavax.net.ssl.trustStorePassword=n0MtVs!wafe0w
+        -Djavax.net.ssl.keyStore=/certs_v2/keystore.jks
+        -Djavax.net.ssl.keyStorePassword=n0MtVs!wafe0w
+        -Djavax.net.debug=ssl
+
+      PRINT_MESSAGE: true
+      KAFKA_PROPERTIES_SSL_TRUSTSTORE_PASSWORD: 'n0MtVs!wafe0w'
+      KAFKA_PROPERTIES_SSL_KEYSTORE_PASSWORD: 'n0MtVs!wafe0w'
+      KAFKA_PROPERTIES_SSL_KEY_PASSWORD: 'n0MtVs!wafe0w'
+      CONSUMER_AUTO_START: true
+      CONSUMER_TOPIC: fs_src_01
+      CONSUMER_GROUP_ID: fs-raw-dump-group
+      CONSUMER_TARGET_DB: feature_store
+      CONSUMER_TARGET_TABLE: raw_messages_replacing
+      CONSUMER_BATCH_SIZE: 8000
+      CONSUMER_BATCH_TIMEOUT_MS: 45000
+
+    volumes:
+      - ./certs:/certs:ro
+      - ./certs_v2:/certs_v2:ro
+    depends_on:
+      broker-1:
+        condition: service_started
+      broker-2:
+        condition: service_started
+      broker-3:
+        condition: service_started
+    #      clickhouse-server:
+    #        condition: service_healthy
+    networks:
+      - default
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/health"]
       interval: 10s
       timeout: 5s
       retries: 3
+      start_period: 30s
 
 volumes:
   clickhouse_data:
