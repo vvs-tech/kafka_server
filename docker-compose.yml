@@ -229,6 +229,7 @@ services:
       SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION: "/certs_v2/keystore.pfx"
       SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_PASSWORD: "n0MtVs!wafe0w"
       SPRING_KAFKA_PROPERTIES_SSL_KEY_PASSWORD: "n0MtVs!wafe0w"
+      FREQUENCY_OF_EMPTY_VALUES: 10
 #      JAVA_OPTS: |
 #        -Djavax.net.ssl.keyStore=/certs_v2/keystore.pfx
 #        -Djavax.net.ssl.keyStoreType=PKCS12
@@ -266,6 +267,7 @@ services:
       SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION: "/certs_v2/keystore.pfx"
       SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_PASSWORD: "n0MtVs!wafe0w"
       SPRING_KAFKA_PROPERTIES_SSL_KEY_PASSWORD: "n0MtVs!wafe0w"
+      FREQUENCY_OF_EMPTY_VALUES: 10
       APP_TOPIC: "sandbox"
       APP_PARTITION: "0"
       APP_INTERVAL_MS: "5000"
@@ -475,7 +477,7 @@ services:
 
       PRINT_MESSAGE: true
       CONSUMER_AUTO_START: false
-      CONSUMER_TOPIC: fs_src_01
+      CONSUMER_TOPIC: fs_src_03
       CONSUMER_GROUP_ID: fs-raw-dump-group
       CONSUMER_TARGET_DB: feature_store
       CONSUMER_TARGET_TABLE: raw_messages_replacing
@@ -495,7 +497,9 @@ services:
 
       HEARTBEAT_INTERVAL_MS_CONFIG: 3000
       SESSION_TIMEOUT_MS_CONFIG: 30000
-      MAX_POLL_INTERVAL_MS_CONFIG: 900000
+      MAX_POLL_INTERVAL_MS_CONFIG: 120000
+
+      VALIDATION_MESSAGE_VALUE_IS_EMPTY: true
 
     volumes:
       - ./certs:/certs:ro
@@ -511,12 +515,12 @@ services:
     #        condition: service_healthy
     networks:
       - default
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
+#    healthcheck:
+#      test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/health"]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 3
+#      start_period: 30s
 
 
   fs-consumer-raw-dump-local-2:
@@ -588,7 +592,7 @@ services:
 
       PRINT_MESSAGE: true
       CONSUMER_AUTO_START: false
-      CONSUMER_TOPIC: fs_src_01
+      CONSUMER_TOPIC: fs_test03_dlq
       CONSUMER_GROUP_ID: fs-raw-dump-group
       CONSUMER_TARGET_DB: feature_store
       CONSUMER_TARGET_TABLE: raw_messages_replacing
@@ -608,7 +612,9 @@ services:
 
       HEARTBEAT_INTERVAL_MS_CONFIG: 3000
       SESSION_TIMEOUT_MS_CONFIG: 30000
-      MAX_POLL_INTERVAL_MS_CONFIG: 900000
+      MAX_POLL_INTERVAL_MS_CONFIG: 180000
+
+      VALIDATION_MESSAGE_VALUE_IS_EMPTY: true
 
     volumes:
       - ./certs:/certs:ro
@@ -624,12 +630,12 @@ services:
     #        condition: service_healthy
     networks:
       - default
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
+#    healthcheck:
+#      test: ["CMD", "curl", "-f", "http://localhost:8085/actuator/health"]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 3
+#      start_period: 30s
 
 volumes:
   clickhouse_data:
