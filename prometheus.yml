@@ -22,7 +22,7 @@ scrape_configs:
   - job_name: 'fs-consumer-raw-dump-local'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: [ 'fs-consumer-raw-dump-local-service:8080' ]
+      - targets: [ 'fs-consumer-raw-dump-local-service:8084' ]
         labels:
           application: 'fs-consumer-raw-dump-local-service'
           group: 'kafka-consumer-services'
