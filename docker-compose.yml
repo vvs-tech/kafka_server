@@ -155,6 +155,15 @@ services:
     networks:
       - default
 
+  pushgateway:
+    image: prom/pushgateway:latest
+    container_name: pushgateway
+    ports:
+      - "9091:9091"
+    restart: unless-stopped
+    networks:
+      - default
+
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
@@ -473,9 +482,9 @@ services:
       JOURNALING_KAFKA_TOPIC: fs_test01
       JOURNALING_KAFKA_BOOTSTRAP_SERVERS: stpimc-00kfp002.innodev.local:9092,stpimc-00kfp003.innodev.local:9092,stpimc-00kfp004.innodev.local:9092
       JOURNALING_KAFKA_PROPERTIES_SECURITY_PROTOCOL: SSL
-      JOURNALING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION: /certs/truststore.pfx
+      JOURNALING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION: /certs_v2/truststore.pfx
       JOURNALING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_PASSWORD: 'n0MtVs!wafe0w'
-      JOURNALING_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION: /certs/keystore.pfx
+      JOURNALING_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION: /certs_v2/keystore.pfx
       JOURNALING_KAFKA_PROPERTIES_SSL_KEYSTORE_PASSWORD: 'n0MtVs!wafe0w'
       JOURNALING_KAFKA_PROPERTIES_SSL_KEY_PASSWORD: 'n0MtVs!wafe0w'
       JOURNALING_KAFKA_ACKS: 1
@@ -483,16 +492,21 @@ services:
       JOURNALING_KAFKA_DELIVERY_TIMEOUT: 120000
 
       JOURNALING_APP_NAME: fs-consumer-raw-dump
-      JOURNALING_NAMESPACE: journaling_namespace_FS
-      SPRING_APPLICATION_NAME: spring_application_name_FS_1
-      POD_NAMESPACE: pod_name_FS_1
+      POD_NAMESPACE: journaling_namespace_FS
       JOURNALING_RIS_CODE: risCodeFS
       JOURNALING_PROJECT_CODE: projectCodeFS
       JOURNALING_APP_TYPE: JAVA
-      JOURNALING_ENV_TYPE: envType_FS
-      DT_CLUSTER_ID: envType_dt_cluster_id_FS
-      HOSTNAME: hostNameFS_1
+      JOURNALING_ENV_TYPE: K8S
+      POD_IP: hostNameFS_1
       JOURNALING_TSLG_CLIENT_VERSION: tslgClientVersionFS
+      JOURNALING_TSLG_SERVER_VERSION: tslgServerVersionFS
+      POD_NAME: podName001
+      NODE_IP: VM_host_name001
+
+      JOURNALING_SOCKET_HOST: 127.0.0.1
+      JOURNALING_SOCKET_PORT: 5170
+      JOURNALING_SOCKET_RECONNECTION_DELAY_MILLIS: 5000
+      JOURNALING_SOCKET_LOCATION_INFO_ENABLED: false
 
       PRODUCER_PROPERTIES_ACKS_CONFIG: all
       PRODUCER_PROPERTIES_ENABLE_IDEMPOTENCE_CONFIG: false
@@ -518,12 +532,12 @@ services:
       SERVICE_PROPERTIES_FREQUENCY_PRINTING_BATCH_LOG: 3
       SERVICE_PROPERTIES_SLOW_CLICKHOUSE_INSERT_PRINTING_LOG_MS: 5000
 
-      JAVA_TOOL_OPTIONS: >
-        -Djavax.net.ssl.trustStore=/certs_v2/truststore.jks
-        -Djavax.net.ssl.trustStorePassword=n0MtVs!wafe0w
-        -Djavax.net.ssl.keyStore=/certs_v2/keystore.jks
-        -Djavax.net.ssl.keyStorePassword=n0MtVs!wafe0w
-        -Djavax.net.debug=ssl
+#      JAVA_TOOL_OPTIONS: >
+#        -Djavax.net.ssl.trustStore=/certs_v2/truststore.jks
+#        -Djavax.net.ssl.trustStorePassword=n0MtVs!wafe0w
+#        -Djavax.net.ssl.keyStore=/certs_v2/keystore.jks
+#        -Djavax.net.ssl.keyStorePassword=n0MtVs!wafe0w
+#        -Djavax.net.debug=ssl
 
       PRINT_MESSAGE: true
       CONSUMER_AUTO_START: false
@@ -566,6 +580,13 @@ services:
       HIKARI_DATA_SOURCE_PROPERTIES_COMPRESS: true
       HIKARI_DATA_SOURCE_PROPERTIES_DECOMPRESS: true
       HIKARI_DATA_SOURCE_PROPERTIES_COMPRESSION: lz4
+
+      MONITORING_SERVICE_ENVIRONMENT: dev-local-1
+      MONITORING_PROMETHEUS_PUSHGATEWAY_URL: http://pushgateway:9091
+      MONITORING_PROMETHEUS_PUSHGATEWAY_PUSH_RATE: 10s
+      MONITORING_STATELESS_REPLICA: tslg-prometheus-5596f9b858-2fcnp
+      MONITORING_TSAM_CLUSTER: tslg-prometheus
+      MONITORING_TSAM_FEDERATION_TYPE: plan-c
 
     volumes:
       - ./certs:/certs:ro
@@ -618,7 +639,7 @@ services:
       FETCH_MIN_BYTES_CONFIG: 1048576
       FETCH_MAX_WAIT_MS_CONFIG: 10000
       MAX_POLL_RECORDS_CONFIG: 8000
-      MIN_POLL_INTERVAL_MS: 1000
+      MIN_POLL_INTERVAL_MS: 2000
       SCHEDULED_FLUSH_MC_CONFIG: 1000
       CH_DRIVER_CLASS_NAME: com.clickhouse.jdbc.ClickHouseDriver
       CLICKHOUSE_RETRY_MAX_ATTEMPTS: 5
@@ -652,9 +673,9 @@ services:
       JOURNALING_KAFKA_TOPIC: fs_test01
       JOURNALING_KAFKA_BOOTSTRAP_SERVERS: stpimc-00kfp002.innodev.local:9092,stpimc-00kfp003.innodev.local:9092,stpimc-00kfp004.innodev.local:9092
       JOURNALING_KAFKA_PROPERTIES_SECURITY_PROTOCOL: SSL
-      JOURNALING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION: /certs/truststore.pfx
+      JOURNALING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION: /certs_v2/truststore.pfx
       JOURNALING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_PASSWORD: 'n0MtVs!wafe0w'
-      JOURNALING_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION: /certs/keystore.pfx
+      JOURNALING_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION: /certs_v2/keystore.pfx
       JOURNALING_KAFKA_PROPERTIES_SSL_KEYSTORE_PASSWORD: 'n0MtVs!wafe0w'
       JOURNALING_KAFKA_PROPERTIES_SSL_KEY_PASSWORD: 'n0MtVs!wafe0w'
       JOURNALING_KAFKA_ACKS: 1
@@ -662,16 +683,21 @@ services:
       JOURNALING_KAFKA_DELIVERY_TIMEOUT: 120000
 
       JOURNALING_APP_NAME: fs-consumer-raw-dump
-      JOURNALING_NAMESPACE: journaling_namespace_FS
-      SPRING_APPLICATION_NAME: spring_application_name_FS_1
-      POD_NAMESPACE: pod_name_FS_2
+      POD_NAMESPACE: journaling_namespace_FS
       JOURNALING_RIS_CODE: risCodeFS
       JOURNALING_PROJECT_CODE: projectCodeFS
       JOURNALING_APP_TYPE: JAVA
-      JOURNALING_ENV_TYPE: envType_FS
-      DT_CLUSTER_ID: envType_dt_cluster_id_FS
-      HOSTNAME: hostNameFS_2
+      JOURNALING_ENV_TYPE: K8S
+      POD_IP: hostNameFS_2
       JOURNALING_TSLG_CLIENT_VERSION: tslgClientVersionFS
+      JOURNALING_TSLG_SERVER_VERSION: tslgServerVersionFS
+      POD_NAME: podName002
+      NODE_IP: VM_host_name002
+
+      JOURNALING_SOCKET_HOST: 127.0.0.1
+      JOURNALING_SOCKET_PORT: 5170
+      JOURNALING_SOCKET_RECONNECTION_DELAY_MILLIS: 5000
+      JOURNALING_SOCKET_LOCATION_INFO_ENABLED: false
 
       PRODUCER_PROPERTIES_ACKS_CONFIG: all
       PRODUCER_PROPERTIES_ENABLE_IDEMPOTENCE_CONFIG: true
@@ -697,12 +723,12 @@ services:
       SERVICE_PROPERTIES_FREQUENCY_PRINTING_BATCH_LOG: 3
       SERVICE_PROPERTIES_SLOW_CLICKHOUSE_INSERT_PRINTING_LOG_MS: 5000
 
-      JAVA_TOOL_OPTIONS: >
-        -Djavax.net.ssl.trustStore=/certs_v2/truststore.jks
-        -Djavax.net.ssl.trustStorePassword=n0MtVs!wafe0w
-        -Djavax.net.ssl.keyStore=/certs_v2/keystore.jks
-        -Djavax.net.ssl.keyStorePassword=n0MtVs!wafe0w
-        -Djavax.net.debug=ssl
+#      JAVA_TOOL_OPTIONS: >
+#        -Djavax.net.ssl.trustStore=/certs_v2/truststore.jks
+#        -Djavax.net.ssl.trustStorePassword=n0MtVs!wafe0w
+#        -Djavax.net.ssl.keyStore=/certs_v2/keystore.jks
+#        -Djavax.net.ssl.keyStorePassword=n0MtVs!wafe0w
+#        -Djavax.net.debug=ssl
 
       PRINT_MESSAGE: true
       CONSUMER_AUTO_START: false
@@ -745,6 +771,13 @@ services:
       HIKARI_DATA_SOURCE_PROPERTIES_COMPRESS: true
       HIKARI_DATA_SOURCE_PROPERTIES_DECOMPRESS: true
       HIKARI_DATA_SOURCE_PROPERTIES_COMPRESSION: lz4
+
+      MONITORING_SERVICE_ENVIRONMENT: dev-local
+      MONITORING_PROMETHEUS_PUSHGATEWAY_URL: http://pushgateway:9091
+      MONITORING_PROMETHEUS_PUSHGATEWAY_PUSH_RATE: 10s
+      MONITORING_STATELESS_REPLICA: tslg-prometheus-5596f9b858-2fcnp2
+      MONITORING_TSAM_CLUSTER: tslg-prometheus2
+      MONITORING_TSAM_FEDERATION_TYPE: plan-c_2
 
     volumes:
       - ./certs:/certs:ro
