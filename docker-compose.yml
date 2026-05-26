@@ -224,10 +224,10 @@ services:
     ports:
       - "8080:8080"
     environment:
-#      SPRING_KAFKA_BOOTSTRAP_SERVERS: "broker-1:19092,broker-2:19092,broker-3:19092"
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: "stpimc-00kfp002.innodev.local:9092,stpimc-00kfp003.innodev.local:9092,stpimc-00kfp004.innodev.local:9092"
-#      SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL: "NO_SSL"
-      SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL: "SSL"
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: "broker-1:19092,broker-2:19092,broker-3:19092"
+#      SPRING_KAFKA_BOOTSTRAP_SERVERS: "stpimc-00kfp002.innodev.local:9092,stpimc-00kfp003.innodev.local:9092,stpimc-00kfp004.innodev.local:9092"
+      SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL: "NO_SSL"
+#      SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL: "SSL"
 #      SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION: "/certs/kafka.truststore.jks"
 #      SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_PASSWORD: "wAUyWEpL<>tWU9VxcAipcZP"
 #      SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION: "/certs/kafka.keystore.jks"
@@ -238,8 +238,8 @@ services:
       SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION: "/certs_v2/keystore.pfx"
       SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_PASSWORD: "n0MtVs!wafe0w"
       SPRING_KAFKA_PROPERTIES_SSL_KEY_PASSWORD: "n0MtVs!wafe0w"
-      FREQUENCY_OF_EMPTY_VALUES: 90000000
-      EMPTY_VALUES_MODE: false
+      FREQUENCY_OF_EMPTY_VALUES: 2
+      EMPTY_VALUES_MODE: true
 #      JAVA_OPTS: |
 #        -Djavax.net.ssl.keyStore=/certs_v2/keystore.pfx
 #        -Djavax.net.ssl.keyStoreType=PKCS12
@@ -428,7 +428,8 @@ services:
     environment:
       #-->> local Click -------------------------------------------------------------
       ###CH_URL: jdbc:clickhouse://localhost:8123/default
-      CH_URL: "jdbc:clickhouse://clickhouse-server:8123/default?compress=1&decompress=1&compression=lz4"
+#      CH_URL: "jdbc:clickhouse://clickhouse-server:8123/default?compress=1&decompress=1&compression=lz4"
+      CH_URL: "jdbc:clickhouse://clickhouse-server:8123/default"
       CH_PORT: 8443
       CH_USER: default
       CH_SECURITY_PROTOCOL: NO
@@ -459,10 +460,10 @@ services:
       CONSUMER_CH_BATCH_GROWTH_FACTOR: 1.25
       CONSUMER_CH_BATCH_DECREASE_FACTOR: 1.25
 
-#      KAFKA_CONSUMER_BOOTSTRAP_SERVERS: broker-1:19092,broker-2:19092,broker-3:19092
-      KAFKA_CONSUMER_BOOTSTRAP_SERVERS: stpimc-00kfp002.innodev.local:9092,stpimc-00kfp003.innodev.local:9092,stpimc-00kfp004.innodev.local:9092
-#      KAFKA_PROPERTIES_SECURITY_PROTOCOL: NO_SSL
-      KAFKA_PROPERTIES_SECURITY_PROTOCOL: SSL
+      KAFKA_CONSUMER_BOOTSTRAP_SERVERS: broker-1:19092,broker-2:19092,broker-3:19092
+#      KAFKA_CONSUMER_BOOTSTRAP_SERVERS: stpimc-00kfp002.innodev.local:9092,stpimc-00kfp003.innodev.local:9092,stpimc-00kfp004.innodev.local:9092
+      KAFKA_PROPERTIES_SECURITY_PROTOCOL: NO_SSL
+#      KAFKA_PROPERTIES_SECURITY_PROTOCOL: SSL
       KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION: /certs_v2/truststore.pfx
       KAFKA_PROPERTIES_SSL_TRUSTSTORE_PASSWORD: 'n0MtVs!wafe0w'
       KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION: /certs_v2/keystore.pfx
@@ -548,7 +549,7 @@ services:
       CONSUMER_BATCH_SIZE: 8000
       CONSUMER_BATCH_TIMEOUT_MS: 45000
 
-      FAILOVER_USQ_TOPIC_ENABLED: true
+      FAILOVER_USQ_TOPIC_ENABLED: false
       FAILOVER_USQ_TOPIC_NAME: fs_test03_dlq
       FAILOVER_HEALTH_CHECK_INTERVAL_MS: 5000
       FAILOVER_POLLING_DELAY_FOR_MODE_HEALTH_CHECK_MS: 5000
@@ -563,7 +564,9 @@ services:
       SESSION_TIMEOUT_MS_CONFIG: 30000
       MAX_POLL_INTERVAL_MS_CONFIG: 900000
 
-      VALIDATION_MESSAGE_VALUE_IS_EMPTY: false
+      VALIDATION_MESSAGE_VALUE_IS_EMPTY: true
+      VALIDATION_HEADER_BUSINESS_DTTM: true
+      VALIDATION_HEADER_MESSAGE_ID: true
 
       LOG_LEVEL_ROOT: INFO
       LOG_LEVEL_APP: DEBUG
@@ -581,12 +584,27 @@ services:
       HIKARI_DATA_SOURCE_PROPERTIES_DECOMPRESS: true
       HIKARI_DATA_SOURCE_PROPERTIES_COMPRESSION: lz4
 
+      MONITORING_PROMETHEUS_PUSHGATEWAY_ENABLED: false
       MONITORING_SERVICE_ENVIRONMENT: dev-local-1
       MONITORING_PROMETHEUS_PUSHGATEWAY_URL: http://pushgateway:9091
       MONITORING_PROMETHEUS_PUSHGATEWAY_PUSH_RATE: 10s
       MONITORING_STATELESS_REPLICA: tslg-prometheus-5596f9b858-2fcnp
       MONITORING_TSAM_CLUSTER: tslg-prometheus
       MONITORING_TSAM_FEDERATION_TYPE: plan-c
+
+      CH_TRUSTSTORE_PASSWORD: n0MtVs!wafe0w
+      CH_KEYSTORE_PASSWORD: n0MtVs!wafe0w
+      CH_KEY_PASSWORD: n0MtVs!wafe0w
+
+      JSON_TO_FLAT_NODE_DELIMITER: .
+      JSON_TO_FLAT_RAW_FALLBACK_DB_NAME: raw_fallback_db
+      JSON_TO_FLAT_RAW_FALLBACK_TABLE_NAME: raw_fallback_table
+      JSON_TO_FLAT_JSON_FIELD_MAPPING_DB_NAME: feature_store
+      JSON_TO_FLAT_JSON_FIELD_MAPPING_TABLE_NAME: json_field_mapping
+
+      TARGET_TABLE_METADATA_SRC_SYSTEM_CODE: src_system_code_undefined
+      TARGET_TABLE_METADATA_BUSINESS_DATA_NAME: business_data_name_undefined
+      TARGET_TABLE_METADATA_DATA_FORMAT_NAME: data_format_name_undefined
 
     volumes:
       - ./certs:/certs:ro
@@ -755,6 +773,8 @@ services:
       MAX_POLL_INTERVAL_MS_CONFIG: 900000
 
       VALIDATION_MESSAGE_VALUE_IS_EMPTY: false
+      VALIDATION_HEADER_BUSINESS_DTTM: true
+      VALIDATION_HEADER_MESSAGE_ID: true
 
       LOG_LEVEL_ROOT: INFO
       LOG_LEVEL_APP: DEBUG
@@ -772,12 +792,27 @@ services:
       HIKARI_DATA_SOURCE_PROPERTIES_DECOMPRESS: true
       HIKARI_DATA_SOURCE_PROPERTIES_COMPRESSION: lz4
 
+      MONITORING_PROMETHEUS_PUSHGATEWAY_ENABLED: false
       MONITORING_SERVICE_ENVIRONMENT: dev-local
       MONITORING_PROMETHEUS_PUSHGATEWAY_URL: http://pushgateway:9091
       MONITORING_PROMETHEUS_PUSHGATEWAY_PUSH_RATE: 10s
       MONITORING_STATELESS_REPLICA: tslg-prometheus-5596f9b858-2fcnp2
       MONITORING_TSAM_CLUSTER: tslg-prometheus2
       MONITORING_TSAM_FEDERATION_TYPE: plan-c_2
+
+      CH_TRUSTSTORE_PASSWORD: n0MtVs!wafe0w
+      CH_KEYSTORE_PASSWORD: n0MtVs!wafe0w
+      CH_KEY_PASSWORD: n0MtVs!wafe0w
+
+      JSON_TO_FLAT_NODE_DELIMITER: .
+      JSON_TO_FLAT_RAW_FALLBACK_DB_NAME: raw_fallback_db
+      JSON_TO_FLAT_RAW_FALLBACK_TABLE_NAME: raw_fallback_table
+      JSON_TO_FLAT_JSON_FIELD_MAPPING_DB_NAME: feature_store
+      JSON_TO_FLAT_JSON_FIELD_MAPPING_TABLE_NAME: json_field_mapping
+
+      TARGET_TABLE_METADATA_SRC_SYSTEM_CODE: src_system_code_undefined
+      TARGET_TABLE_METADATA_BUSINESS_DATA_NAME: business_data_name_undefined
+      TARGET_TABLE_METADATA_DATA_FORMAT_NAME: data_format_name_undefined
 
     volumes:
       - ./certs:/certs:ro
