@@ -238,8 +238,12 @@ services:
       SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION: "/certs_v2/keystore.pfx"
       SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_PASSWORD: "n0MtVs!wafe0w"
       SPRING_KAFKA_PROPERTIES_SSL_KEY_PASSWORD: "n0MtVs!wafe0w"
-      FREQUENCY_OF_EMPTY_VALUES: 2
-      EMPTY_VALUES_MODE: true
+      FREQUENCY_OF_EMPTY_VALUES: 7
+      EMPTY_VALUES_MODE: false
+      DATE_TIME_FOR_HEADER_FORMAT_DATETIME: false
+      DATE_TIME_FOR_HEADER_FORMAT_ISO: false
+      DATE_TIME_FOR_HEADER_FORMAT_MICRO: false
+      DATE_TIME_FOR_HEADER_FORMAT_MIX: true
 #      JAVA_OPTS: |
 #        -Djavax.net.ssl.keyStore=/certs_v2/keystore.pfx
 #        -Djavax.net.ssl.keyStoreType=PKCS12
@@ -279,6 +283,10 @@ services:
       SPRING_KAFKA_PROPERTIES_SSL_KEY_PASSWORD: "n0MtVs!wafe0w"
       FREQUENCY_OF_EMPTY_VALUES: 90000000
       EMPTY_VALUES_MODE: false
+      DATE_TIME_FOR_HEADER_FORMAT_DATETIME: true
+      DATE_TIME_FOR_HEADER_FORMAT_ISO: false
+      DATE_TIME_FOR_HEADER_FORMAT_MICRO: false
+      DATE_TIME_FOR_HEADER_FORMAT_MIX: false
       APP_TOPIC: "sandbox"
       APP_PARTITION: "0"
       APP_INTERVAL_MS: "5000"
@@ -436,8 +444,10 @@ services:
       CH_PASSWORD: default
       #-->> local Click  -------------------------------------------------------------
 
-#      CH_URL: "jdbc:clickhouse://stpimc-00chp009.innodev.local:8443,stpimc-00chp011.innodev.local:8443,stpimc-00chp003.innodev.local:8443,stpimc-00chp001.innodev.local:8443,stpimc-00chp012.innodev.local:8443,stpimc-00chp005.innodev.local:8443/default?ssl=true&sslMode=STRICT"
+#      CH_URL: "jdbc:clickhouse://stpimc-00chp004.innodev.local:8443,stpimc-00chp011.innodev.local:8443,stpimc-00chp003.innodev.local:8443,stpimc-00chp001.innodev.local:8443,stpimc-00chp012.innodev.local:8443,stpimc-00chp005.innodev.local:8443/default?ssl=true&sslMode=STRICT"
+#      CH_URL: "jdbc:clickhouse://stpimc-00chp004.innodev.local:8443/default?ssl=true&sslMode=STRICT"
 #      CH_USER: admin
+#      CH_PASSWORD: "Tr^o513F0%OkVo6Q(@MZPu!SDzGXwAR@RK~H(YPdtKi*pHzGmJhhQ$(4IqXfeegMn"
 #      CH_SECURITY_PROTOCOL: SSL
 
       CH_ENABLE_QUORUM_INSERT: false
@@ -533,12 +543,13 @@ services:
       SERVICE_PROPERTIES_FREQUENCY_PRINTING_BATCH_LOG: 3
       SERVICE_PROPERTIES_SLOW_CLICKHOUSE_INSERT_PRINTING_LOG_MS: 5000
 
-#      JAVA_TOOL_OPTIONS: >
-#        -Djavax.net.ssl.trustStore=/certs_v2/truststore.jks
-#        -Djavax.net.ssl.trustStorePassword=n0MtVs!wafe0w
-#        -Djavax.net.ssl.keyStore=/certs_v2/keystore.jks
-#        -Djavax.net.ssl.keyStorePassword=n0MtVs!wafe0w
-#        -Djavax.net.debug=ssl
+      JAVA_TOOL_OPTIONS: >
+        -Djavax.net.ssl.trustStore=/certs_v2/truststore.jks
+        -Djavax.net.ssl.trustStorePassword=n0MtVs!wafe0w
+        -Djavax.net.ssl.keyStore=/certs_v2/keystore.jks
+        -Djavax.net.ssl.keyStorePassword=n0MtVs!wafe0w
+        -Djavax.net.debug=ssl
+
 
       PRINT_MESSAGE: true
       CONSUMER_AUTO_START: false
@@ -564,9 +575,10 @@ services:
       SESSION_TIMEOUT_MS_CONFIG: 30000
       MAX_POLL_INTERVAL_MS_CONFIG: 900000
 
-      VALIDATION_MESSAGE_VALUE_IS_EMPTY: true
-      VALIDATION_HEADER_BUSINESS_DTTM: true
+      VALIDATION_HEADER_BUSINESS_CREATE_DTTM: true
+      VALIDATION_HEADER_BUSINESS_UPDATE_DTTM: true
       VALIDATION_HEADER_MESSAGE_ID: true
+      VALIDATION_HEADER_BUSINESS_ID: true
 
       LOG_LEVEL_ROOT: INFO
       LOG_LEVEL_APP: DEBUG
@@ -602,9 +614,10 @@ services:
       JSON_TO_FLAT_JSON_FIELD_MAPPING_DB_NAME: feature_store
       JSON_TO_FLAT_JSON_FIELD_MAPPING_TABLE_NAME: json_field_mapping
 
-      TARGET_TABLE_METADATA_SRC_SYSTEM_CODE: src_system_code_undefined
-      TARGET_TABLE_METADATA_BUSINESS_DATA_NAME: business_data_name_undefined
-      TARGET_TABLE_METADATA_DATA_FORMAT_NAME: data_format_name_undefined
+      TARGET_TABLE_METADATA_FROM_HEADERS: true
+      TARGET_TABLE_METADATA_SRC_SYSTEM_CODE: src_system_code_undefined_s1
+      TARGET_TABLE_METADATA_BUSINESS_DATA_NAME: business_data_name_undefined_s1
+      TARGET_TABLE_METADATA_DATA_FORMAT_NAME: data_format_name_undefined_s1
 
     volumes:
       - ./certs:/certs:ro
@@ -772,9 +785,10 @@ services:
       SESSION_TIMEOUT_MS_CONFIG: 30000
       MAX_POLL_INTERVAL_MS_CONFIG: 900000
 
-      VALIDATION_MESSAGE_VALUE_IS_EMPTY: false
-      VALIDATION_HEADER_BUSINESS_DTTM: true
+      VALIDATION_HEADER_BUSINESS_CREATE_DTTM: true
+      VALIDATION_HEADER_BUSINESS_UPDATE_DTTM: true
       VALIDATION_HEADER_MESSAGE_ID: true
+      VALIDATION_HEADER_BUSINESS_ID: true
 
       LOG_LEVEL_ROOT: INFO
       LOG_LEVEL_APP: DEBUG
@@ -810,9 +824,10 @@ services:
       JSON_TO_FLAT_JSON_FIELD_MAPPING_DB_NAME: feature_store
       JSON_TO_FLAT_JSON_FIELD_MAPPING_TABLE_NAME: json_field_mapping
 
-      TARGET_TABLE_METADATA_SRC_SYSTEM_CODE: src_system_code_undefined
-      TARGET_TABLE_METADATA_BUSINESS_DATA_NAME: business_data_name_undefined
-      TARGET_TABLE_METADATA_DATA_FORMAT_NAME: data_format_name_undefined
+      TARGET_TABLE_METADATA_FROM_HEADERS: true
+      TARGET_TABLE_METADATA_SRC_SYSTEM_CODE: src_system_code_undefined_s2
+      TARGET_TABLE_METADATA_BUSINESS_DATA_NAME: business_data_name_undefined_s2
+      TARGET_TABLE_METADATA_DATA_FORMAT_NAME: data_format_name_undefined_s2
 
     volumes:
       - ./certs:/certs:ro
